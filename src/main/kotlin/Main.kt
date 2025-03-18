@@ -1,5 +1,8 @@
 package org.example
 
+import java.io.File
+
 fun main() {
-    println("Hello World!")
+    val dictionary = File("words.txt")
+    dictionary.readLines().forEach { println(it) }
 }
