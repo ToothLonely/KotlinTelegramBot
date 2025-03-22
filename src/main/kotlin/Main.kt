@@ -10,10 +10,10 @@ fun main() {
         val line = it.split('|')
         val word = Word(line[0], line[1])
 
-        if (line.size == 3) {
-            word.correctAnswerCount = line[2].toInt()
+        word.correctAnswerCount = if (line.size == 3) {
+            line[2].toInt()
         } else {
-            word.correctAnswerCount = 0
+            0
         }
 
         dictionary.add(word)
