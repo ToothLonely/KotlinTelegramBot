@@ -8,13 +8,7 @@ fun main() {
 
     words.readLines().forEach {
         val line = it.split('|')
-        val word = Word(line[0], line[1])
-
-        word.correctAnswerCount = if (line.size == 3) {
-            line[2].toInt()
-        } else {
-            0
-        }
+        val word = Word(line[0], line[1], line.getOrNull(2)?.toIntOrNull() ?: 0)
 
         dictionary.add(word)
     }
