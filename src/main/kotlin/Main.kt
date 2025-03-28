@@ -1,17 +1,17 @@
 package org.example
 
-import java.io.File
-
 fun main() {
-    val words = File("words.txt")
-    val dictionary = mutableListOf<Word>()
+    val filename = "words.txt"
+    val dictionary = Menu().loadDictionary(filename)
 
-    words.readLines().forEach {
-        val line = it.split('|')
-        val word = Word(line[0], line[1], line.getOrNull(2)?.toIntOrNull() ?: 0)
+    while (true) {
+        Menu().show()
 
-        dictionary.add(word)
+        when (readln()) {
+            "1" -> println("Вы выбрали учить слова")
+            "2" -> println("Вы выбрали просмотреть статистику")
+            "0" -> break
+            else -> println("Введите число 1, 2 или 0")
+        }
     }
-
-    dictionary.forEach { println(it) }
 }
