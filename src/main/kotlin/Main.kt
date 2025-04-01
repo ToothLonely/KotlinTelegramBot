@@ -3,6 +3,7 @@ package org.example
 import java.io.File
 
 const val ONE_HUNDRED_PERCENT = 100
+const val MINIMUM_CORRECT_ANSWERS = 3
 
 fun loadDictionary(fileName: String): List<Word> {
     val words = File(fileName)
@@ -19,7 +20,7 @@ fun loadDictionary(fileName: String): List<Word> {
 }
 
 fun showStatistic(dictionary: List<Word>) {
-    val learnedCount = dictionary.filter { it.correctAnswerCount >= 3 }.size
+    val learnedCount = dictionary.filter { it.correctAnswerCount >= MINIMUM_CORRECT_ANSWERS }.size
     val totalCount = dictionary.size
     val percent = (learnedCount.toDouble() / totalCount) * ONE_HUNDRED_PERCENT
 
