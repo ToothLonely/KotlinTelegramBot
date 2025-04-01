@@ -2,8 +2,8 @@ package org.example
 
 import java.io.File
 
-fun main() {
-    val words = File("words.txt")
+fun loadDictionary(fileName: String): List<Word> {
+    val words = File(fileName)
     val dictionary = mutableListOf<Word>()
 
     words.readLines().forEach {
@@ -13,5 +13,29 @@ fun main() {
         dictionary.add(word)
     }
 
-    dictionary.forEach { println(it) }
+    return dictionary
+}
+
+fun main() {
+    val filename = "words.txt"
+    val dictionary = loadDictionary(filename)
+
+    while (true) {
+        println(
+            """
+                Меню:
+                1 - Учить слова
+                2 - Статистика
+                3 - Выход
+                Выберите один из вариантов (1, 2 или 0)
+            """.trimIndent()
+        )
+
+        when (readln()) {
+            "1" -> println("Вы выбрали учить слова")
+            "2" -> println("Вы выбрали просмотреть статистику")
+            "0" -> break
+            else -> println("Введите число 1, 2 или 0")
+        }
+    }
 }
