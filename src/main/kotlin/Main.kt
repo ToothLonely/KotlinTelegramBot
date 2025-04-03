@@ -4,6 +4,8 @@ import java.io.File
 
 const val ONE_HUNDRED_PERCENT = 100
 const val MINIMUM_CORRECT_ANSWERS = 3
+const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
+const val NUMBER_OF_WORDS_TO_ANSWER = 4
 
 fun loadDictionary(fileName: String): List<Word> {
     val words = File(fileName)
@@ -28,6 +30,29 @@ fun showStatistic(dictionary: List<Word>) {
     println()
 }
 
+fun learnWords(dictionary: List<Word>) {
+    while (true) {
+        val notLearnedList = if (dictionary.none { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }) {
+            println("Все слова в словаре выучены")
+            return
+        } else {
+            dictionary.filter { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }
+        }
+
+        val questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER)
+
+        for (i in notLearnedList) {
+            println("${i.englishWord}: ")
+            questionWords.shuffled().forEachIndexed { index, word ->
+                println("\t${index + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX} - ${word.russianWord}")
+            }
+
+            val answer = readln()
+        }
+
+    }
+}
+
 fun main() {
     val filename = "words.txt"
     val dictionary = loadDictionary(filename)
@@ -44,7 +69,10 @@ fun main() {
         )
 
         when (readln()) {
-            "1" -> println("Вы выбрали учить слова")
+            "1" -> {
+                println("Вы выбрали учить слова")
+                learnWords(dictionary)
+            }
 
             "2" -> {
                 println("Вы выбрали просмотреть статистику")
