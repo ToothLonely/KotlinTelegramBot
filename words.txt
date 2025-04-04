@@ -3,3 +3,6 @@ dog|собака
 cat|кошка|0
 pen|ручка
 pencil|карандаш|0
+house|дом|0
+horse|лошадь
+elephant|слон|0
