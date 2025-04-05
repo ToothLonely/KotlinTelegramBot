@@ -6,6 +6,7 @@ const val ONE_HUNDRED_PERCENT = 100
 const val MINIMUM_CORRECT_ANSWERS = 3
 const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
 const val NUMBER_OF_WORDS_TO_ANSWER = 3
+const val NUMBER_OF_ELEMENTS_WITHOUT_CORRECT_ANSWER_COUNT = 2
 
 fun loadDictionary(fileName: String): List<Word> {
     val words = File(fileName)
@@ -40,16 +41,16 @@ fun saveDictionary(dictionary: List<Word>, filename: String) {
 
         for (word in dictionary) {
             if (word.englishWord == currentWord.englishWord && word.correctAnswerCount != currentWord.correctAnswerCount) {
-                //Тут я добавляю |0 в тех словах, где их не было
-                if (currentLine.size == 2) {
-                    currentData = currentData.replace(it, "$it|0")
+
+                if (currentLine.size == NUMBER_OF_ELEMENTS_WITHOUT_CORRECT_ANSWER_COUNT) {
+                    currentData = currentData.replace(it, "$it|${word.correctAnswerCount}")
+                    words.writeText(currentData)
+                } else {
+                    val newLine =
+                        it.replace(currentWord.correctAnswerCount.toString(), word.correctAnswerCount.toString())
+                    currentData = currentData.replace(it, newLine)
                     words.writeText(currentData)
                 }
-
-                val newLine =
-                    it.replace(currentWord.correctAnswerCount.toString(), word.correctAnswerCount.toString())
-                currentData = currentData.replace(it, newLine)
-                words.writeText(currentData)
 
                 break
             }
@@ -130,12 +131,10 @@ fun main() {
 
         when (readln()) {
             "1" -> {
-                println("Вы выбрали учить слова")
                 learnWords(dictionary)
             }
 
             "2" -> {
-                println("Вы выбрали просмотреть статистику")
                 showStatistic(dictionary)
             }
 
