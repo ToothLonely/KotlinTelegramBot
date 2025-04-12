@@ -5,7 +5,7 @@ import java.io.File
 const val ONE_HUNDRED_PERCENT = 100
 const val MINIMUM_CORRECT_ANSWERS = 3
 const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
-const val NUMBER_OF_WORDS_TO_ANSWER = 3
+const val NUMBER_OF_WORDS_TO_ANSWER = 4
 const val NUMBER_OF_ELEMENTS_WITHOUT_CORRECT_ANSWER_COUNT = 2
 
 fun loadDictionary(fileName: String): List<Word> {
