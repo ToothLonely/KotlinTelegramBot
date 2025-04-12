@@ -70,9 +70,18 @@ fun learnWords(dictionary: List<Word>) {
             dictionary.filter { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }
         }
 
-        val questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER).toMutableList()
+        var questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER).toMutableList()
         val answeredWord = questionWords.random()
         val correctAnswerId = questionWords.indexOf(answeredWord) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
+
+        if (questionWords.size <= NUMBER_OF_WORDS_TO_ANSWER) {
+            val numberOfWordsToAdd = NUMBER_OF_WORDS_TO_ANSWER - questionWords.size
+            val learnedWords = dictionary
+                .sortedBy { it.correctAnswerCount }
+                .filter { it !in questionWords }
+                .take(numberOfWordsToAdd)
+            questionWords = questionWords.plus(learnedWords).toMutableList()
+        }
 
         println("${answeredWord.englishWord}: ")
         questionWords.forEachIndexed { index, word ->
