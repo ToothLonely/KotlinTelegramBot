@@ -59,7 +59,10 @@ fun saveDictionary(dictionary: List<Word>, filename: String) {
 }
 
 fun learnWords(dictionary: List<Word>) {
-    outer@ while (true) {
+    while (true) {
+        var userAnswerInput = 0
+        var userAnswerInputFlag = true
+
         val notLearnedList = if (dictionary.none { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }) {
             println("Все слова в словаре выучены")
             return
@@ -68,49 +71,34 @@ fun learnWords(dictionary: List<Word>) {
         }
 
         val questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER).toMutableList()
+        val answeredWord = questionWords.random()
+        val correctAnswerId = questionWords.indexOf(answeredWord) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
 
-        for (currentWord in notLearnedList) {
-            if (currentWord in questionWords) continue
+        println("${answeredWord.englishWord}: ")
+        questionWords.forEachIndexed { index, word ->
+            println("\t${index + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX} - ${word.russianWord}")
+        }
+        println("\t----------")
+        println("\t0 -  Меню")
 
-            val correctAnswerId: Int
-            var userAnswerInput = 0
-            var userAnswerInputFlag = true
-
-            questionWords.add(currentWord)
-            val shuffledQuestionWords = questionWords.shuffled()
-            correctAnswerId =
-                shuffledQuestionWords.indexOf(currentWord) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
-
-            println("${currentWord.englishWord}: ")
-            shuffledQuestionWords.forEachIndexed { index, word ->
-                println("\t${index + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX} - ${word.russianWord}")
+        while (userAnswerInputFlag) {
+            try {
+                userAnswerInput = readln().toInt()
+                userAnswerInputFlag = false
+            } catch (e: NumberFormatException) {
+                println("Ввести надо число")
             }
-            println("\t----------")
-            println("\t0 -  Меню")
-            //println(correctAnswerId)
-
-            while (userAnswerInputFlag) {
-                try {
-                    userAnswerInput = readln().toInt()
-                    userAnswerInputFlag = false
-                } catch (e: NumberFormatException) {
-                    println("Ввести надо число")
-                }
-            }
-
-            if (userAnswerInput == correctAnswerId) {
-                println("Правильно!")
-                currentWord.correctAnswerCount++
-                saveDictionary(dictionary, "words.txt")
-            } else if (userAnswerInput == 0) {
-                break@outer
-            } else {
-                println("Неправильно! ${currentWord.englishWord} – это ${currentWord.russianWord}")
-            }
-
-            questionWords.remove(currentWord)
         }
 
+        if (userAnswerInput == correctAnswerId) {
+            println("Правильно!")
+            answeredWord.correctAnswerCount++
+            saveDictionary(dictionary, "words.txt")
+        } else if (userAnswerInput == 0) {
+            break
+        } else {
+            println("Неправильно! ${answeredWord.englishWord} – это ${answeredWord.russianWord}")
+        }
     }
 }
 
@@ -124,7 +112,7 @@ fun main() {
                 Меню:
                 1 - Учить слова
                 2 - Статистика
-                3 - Выход
+                0 - Выход
                 Выберите один из вариантов (1, 2 или 0)
             """.trimIndent()
         )
