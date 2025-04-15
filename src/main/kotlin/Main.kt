@@ -6,7 +6,6 @@ const val ONE_HUNDRED_PERCENT = 100
 const val MINIMUM_CORRECT_ANSWERS = 3
 const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
 const val NUMBER_OF_WORDS_TO_ANSWER = 4
-const val NUMBER_OF_ELEMENTS_WITHOUT_CORRECT_ANSWER_COUNT = 2
 
 fun loadDictionary(fileName: String): List<Word> {
     val words = File(fileName)
@@ -32,29 +31,10 @@ fun showStatistic(dictionary: List<Word>) {
 }
 
 fun saveDictionary(dictionary: List<Word>, filename: String) {
-    val words = File(filename)
-    var currentData = words.readText()
-
-    words.readLines().forEach {
-        val currentLine = it.split('|')
-        val currentWord = Word(currentLine[0], currentLine[1], currentLine.getOrNull(2)?.toIntOrNull() ?: 0)
-
-        for (word in dictionary) {
-            if (word.englishWord == currentWord.englishWord && word.correctAnswerCount != currentWord.correctAnswerCount) {
-
-                if (currentLine.size == NUMBER_OF_ELEMENTS_WITHOUT_CORRECT_ANSWER_COUNT) {
-                    currentData = currentData.replace(it, "$it|${word.correctAnswerCount}")
-                    words.writeText(currentData)
-                } else {
-                    val newLine =
-                        it.replace(currentWord.correctAnswerCount.toString(), word.correctAnswerCount.toString())
-                    currentData = currentData.replace(it, newLine)
-                    words.writeText(currentData)
-                }
-
-                break
-            }
-        }
+    val wordsFile = File(filename)
+    wordsFile.writeText("")
+    dictionary.forEach { word ->
+        wordsFile.appendText("${word.englishWord}|${word.russianWord}|${word.correctAnswerCount}\n")
     }
 }
 
@@ -63,14 +43,13 @@ fun learnWords(dictionary: List<Word>) {
         var userAnswerInput = 0
         var userAnswerInputFlag = true
 
-        val notLearnedList = if (dictionary.none { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }) {
+        val notLearnedList = dictionary.filter { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }
+        if (notLearnedList.isEmpty()) {
             println("Все слова в словаре выучены")
             return
-        } else {
-            dictionary.filter { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }
         }
 
-        var questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER).toMutableList()
+        var questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER)
         val answeredWord = questionWords.random()
         val correctAnswerId = questionWords.indexOf(answeredWord) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
 
@@ -80,15 +59,19 @@ fun learnWords(dictionary: List<Word>) {
                 .sortedBy { it.correctAnswerCount }
                 .filter { it !in questionWords }
                 .take(numberOfWordsToAdd)
-            questionWords = questionWords.plus(learnedWords).toMutableList()
+            questionWords = questionWords.plus(learnedWords)
         }
 
-        println("${answeredWord.englishWord}: ")
-        questionWords.forEachIndexed { index, word ->
-            println("\t${index + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX} - ${word.russianWord}")
-        }
-        println("\t----------")
-        println("\t0 -  Меню")
+        val variants = questionWords
+            .mapIndexed { index: Int, word: Word -> " ${index + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX} – ${word.russianWord}" }
+            .joinToString(
+                separator = "\n\t",
+                prefix = "\n${answeredWord.englishWord}:\n\t",
+                postfix = "\n\t ----------\n\t 0 – Меню",
+            )
+
+        println(variants)
+
 
         while (userAnswerInputFlag) {
             try {
@@ -99,14 +82,17 @@ fun learnWords(dictionary: List<Word>) {
             }
         }
 
-        if (userAnswerInput == correctAnswerId) {
-            println("Правильно!")
-            answeredWord.correctAnswerCount++
-            saveDictionary(dictionary, "words.txt")
-        } else if (userAnswerInput == 0) {
-            break
-        } else {
-            println("Неправильно! ${answeredWord.englishWord} – это ${answeredWord.russianWord}")
+        when (userAnswerInput) {
+            correctAnswerId -> {
+                println("Правильно!")
+                answeredWord.correctAnswerCount++
+                saveDictionary(dictionary, "words.txt")
+            }
+
+            0 -> break
+            else -> {
+                println("Неправильно! ${answeredWord.englishWord} - это ${answeredWord.russianWord}")
+            }
         }
     }
 }
