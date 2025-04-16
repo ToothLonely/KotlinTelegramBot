@@ -30,8 +30,8 @@ fun showStatistic(dictionary: List<Word>) {
     println()
 }
 
-fun saveDictionary(dictionary: List<Word>, filename: String) {
-    val wordsFile = File(filename)
+fun saveDictionary(dictionary: List<Word>) {
+    val wordsFile = File("words.txt")
     wordsFile.writeText("")
     dictionary.forEach { word ->
         wordsFile.appendText("${word.englishWord}|${word.russianWord}|${word.correctAnswerCount}\n")
@@ -56,8 +56,8 @@ fun learnWords(dictionary: List<Word>) {
         if (questionWords.size <= NUMBER_OF_WORDS_TO_ANSWER) {
             val numberOfWordsToAdd = NUMBER_OF_WORDS_TO_ANSWER - questionWords.size
             val learnedWords = dictionary
-                .sortedBy { it.correctAnswerCount }
-                .filter { it !in questionWords }
+                .filter { it.correctAnswerCount >= MINIMUM_CORRECT_ANSWERS }
+                .shuffled()
                 .take(numberOfWordsToAdd)
             questionWords = questionWords.plus(learnedWords)
         }
@@ -86,7 +86,7 @@ fun learnWords(dictionary: List<Word>) {
             correctAnswerId -> {
                 println("Правильно!")
                 answeredWord.correctAnswerCount++
-                saveDictionary(dictionary, "words.txt")
+                saveDictionary(dictionary)
             }
 
             0 -> break
