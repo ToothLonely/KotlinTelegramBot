@@ -30,26 +30,70 @@ fun showStatistic(dictionary: List<Word>) {
     println()
 }
 
+fun saveDictionary(dictionary: List<Word>) {
+    val wordsFile = File("words.txt")
+    wordsFile.writeText("")
+    dictionary.forEach { word ->
+        wordsFile.appendText("${word.englishWord}|${word.russianWord}|${word.correctAnswerCount}\n")
+    }
+}
+
 fun learnWords(dictionary: List<Word>) {
     while (true) {
-        val notLearnedList = if (dictionary.none { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }) {
+        var userAnswerInput = 0
+        var userAnswerInputFlag = true
+
+        val notLearnedList = dictionary.filter { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }
+        if (notLearnedList.isEmpty()) {
             println("Все слова в словаре выучены")
             return
-        } else {
-            dictionary.filter { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }
         }
 
-        val questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER)
+        var questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER)
+        val answeredWord = questionWords.random()
+        val correctAnswerId = questionWords.indexOf(answeredWord) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
 
-        for (i in notLearnedList) {
-            println("${i.englishWord}: ")
-            questionWords.shuffled().forEachIndexed { index, word ->
-                println("\t${index + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX} - ${word.russianWord}")
+        if (questionWords.size <= NUMBER_OF_WORDS_TO_ANSWER) {
+            val numberOfWordsToAdd = NUMBER_OF_WORDS_TO_ANSWER - questionWords.size
+            val learnedWords = dictionary
+                .filter { it.correctAnswerCount >= MINIMUM_CORRECT_ANSWERS }
+                .shuffled()
+                .take(numberOfWordsToAdd)
+            questionWords = questionWords.plus(learnedWords)
+        }
+
+        val variants = questionWords
+            .mapIndexed { index: Int, word: Word -> " ${index + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX} – ${word.russianWord}" }
+            .joinToString(
+                separator = "\n\t",
+                prefix = "\n${answeredWord.englishWord}:\n\t",
+                postfix = "\n\t ----------\n\t 0 – Меню",
+            )
+
+        println(variants)
+
+
+        while (userAnswerInputFlag) {
+            try {
+                userAnswerInput = readln().toInt()
+                userAnswerInputFlag = false
+            } catch (e: NumberFormatException) {
+                println("Ввести надо число")
+            }
+        }
+
+        when (userAnswerInput) {
+            correctAnswerId -> {
+                println("Правильно!")
+                answeredWord.correctAnswerCount++
+                saveDictionary(dictionary)
             }
 
-            val answer = readln()
+            0 -> break
+            else -> {
+                println("Неправильно! ${answeredWord.englishWord} - это ${answeredWord.russianWord}")
+            }
         }
-
     }
 }
 
@@ -63,19 +107,17 @@ fun main() {
                 Меню:
                 1 - Учить слова
                 2 - Статистика
-                3 - Выход
+                0 - Выход
                 Выберите один из вариантов (1, 2 или 0)
             """.trimIndent()
         )
 
         when (readln()) {
             "1" -> {
-                println("Вы выбрали учить слова")
                 learnWords(dictionary)
             }
 
             "2" -> {
-                println("Вы выбрали просмотреть статистику")
                 showStatistic(dictionary)
             }
 
