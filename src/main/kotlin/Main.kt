@@ -5,6 +5,9 @@ const val ONE_HUNDRED_PERCENT = 100
 const val MINIMUM_CORRECT_ANSWERS = 3
 const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
 const val NUMBER_OF_WORDS_TO_ANSWER = 4
+const val LEARN_WORDS_POINT = 1
+const val STATISTIC_POINT = 2
+const val EXIT_POINT = 0
 
 fun Questions.transformToString(): String {
     val variants = this.variants
@@ -51,10 +54,11 @@ fun learnWords(trainer: LearnWordsTrainer) {
 
         val userAnswerInput = makeCorrectInput()
 
+        if (userAnswerInput == EXIT_POINT) break
+
         when (trainer.checkAnswer(userAnswerInput, questions)) {
             true -> println("Правильно!")
             false -> println("Неправильно! ${questions.correctAnswer.englishWord} - это ${questions.correctAnswer.russianWord}")
-            else -> break
         }
     }
 }
@@ -73,16 +77,16 @@ fun main() {
             """.trimIndent()
         )
 
-        when (readln()) {
-            "1" -> {
+        when (readln().toIntOrNull()) {
+            LEARN_WORDS_POINT -> {
                 learnWords(trainer)
             }
 
-            "2" -> {
+            STATISTIC_POINT -> {
                 showStatistic(trainer)
             }
 
-            "0" -> break
+            EXIT_POINT -> break
 
             else -> println("Введите число 1, 2 или 0")
         }

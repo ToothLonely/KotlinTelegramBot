@@ -51,7 +51,6 @@ class LearnWordsTrainer {
         if (notLearnedList.isEmpty()) return null
         var questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER)
         val answeredWord = questionWords.random()
-        //val correctAnswerId = questionWords.indexOf(answeredWord) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
         if (questionWords.size <= NUMBER_OF_WORDS_TO_ANSWER) {
             val numberOfWordsToAdd = NUMBER_OF_WORDS_TO_ANSWER - questionWords.size
             val learnedWords = dictionary
@@ -64,7 +63,7 @@ class LearnWordsTrainer {
         return Questions(questionWords, answeredWord)
     }
 
-    fun checkAnswer(userAnswerInput: Int, questions: Questions): Boolean? {
+    fun checkAnswer(userAnswerInput: Int, questions: Questions): Boolean {
         val correctAnswerId =
             questions.variants.indexOf(questions.correctAnswer) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
         when (userAnswerInput) {
@@ -74,7 +73,6 @@ class LearnWordsTrainer {
                 return true
             }
 
-            0 -> return null
             else -> return false
         }
     }
