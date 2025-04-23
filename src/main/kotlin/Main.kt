@@ -64,7 +64,12 @@ fun learnWords(trainer: LearnWordsTrainer) {
 }
 
 fun main() {
-    val trainer = LearnWordsTrainer()
+    val trainer = try {
+        LearnWordsTrainer()
+    } catch (e: Exception) {
+        println("Что-то пошло не так, но мы уже над этим работаем...")
+        return
+    }
 
     while (true) {
         println(

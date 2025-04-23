@@ -18,17 +18,21 @@ class LearnWordsTrainer {
     private val dictionary = loadDictionary()
 
     private fun loadDictionary(): List<Word> {
-        val words = File(FILENAME)
-        val dictionary = mutableListOf<Word>()
+        try {
 
-        words.readLines().forEach {
-            val line = it.split('|')
-            val word = Word(line[0], line[1], line.getOrNull(2)?.toIntOrNull() ?: 0)
+            val words = File(FILENAME)
+            val dictionary = mutableListOf<Word>()
 
-            dictionary.add(word)
+            words.readLines().forEach {
+                val line = it.split('|')
+                val word = Word(line[0], line[1], line.getOrNull(2)?.toIntOrNull() ?: 0)
+
+                dictionary.add(word)
+            }
+            return dictionary
+        } catch (e: IndexOutOfBoundsException) {
+            throw IllegalStateException("Не удалось загрузить словарь")
         }
-
-        return dictionary
     }
 
     private fun saveDictionary(dictionary: List<Word>) {
