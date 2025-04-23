@@ -12,11 +12,11 @@ fun main(args: Array<String>) {
     val urlGetUpdate = "https://api.telegram.org/bot$botToken/getUpdates"
 
     val client = HttpClient.newBuilder().build()
-    val request = HttpRequest.newBuilder().uri(URI.create(urlGetMe)).build()
-    val request1 = HttpRequest.newBuilder().uri(URI.create(urlGetUpdate)).build()
-    val response = client.send(request, BodyHandlers.ofString())
-    val response1 = client.send(request1, BodyHandlers.ofString())
+    val getMeRequest = HttpRequest.newBuilder().uri(URI.create(urlGetMe)).build()
+    val getUpdatesRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdate)).build()
+    val getMeResponse = client.send(getMeRequest, BodyHandlers.ofString())
+    val getUpdatesResponse = client.send(getUpdatesRequest, BodyHandlers.ofString())
 
-    println(response.body())
-    println(response1.body())
+    println(getMeResponse.body())
+    println(getUpdatesResponse.body())
 }
