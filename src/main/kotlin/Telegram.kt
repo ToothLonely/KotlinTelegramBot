@@ -18,14 +18,16 @@ fun main(args: Array<String>) {
         val updates = getUpdates(botToken, updateId)
         println(updates)
 
-        val updateIdRegex = UPDATE_ID_TEMPLATE.toRegex()
-        val matchResultUpdateId = updateIdRegex.find(updates) ?: continue
-        updateId = matchResultUpdateId.groups[1]!!.value.toInt()
-        println(updateId)
+        val getValueByRegex = { template: String ->
+            val valueRegex = template.toRegex()
+            val matchResult = valueRegex.find(updates)
+            val value = matchResult?.groups?.get(1)?.value
+            value
+        }
 
-        val messageTextRegex: Regex = TEXT_TEMPLATE.toRegex()
-        val matchResultText = messageTextRegex.find(updates)
-        val text = matchResultText?.groups?.get(1)?.value
+        updateId = getValueByRegex(UPDATE_ID_TEMPLATE)?.toInt() ?: continue
+        val text = getValueByRegex(TEXT_TEMPLATE)
+        println(updateId)
         println(text)
         updateId++
     }
