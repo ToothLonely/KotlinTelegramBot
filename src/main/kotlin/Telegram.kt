@@ -12,21 +12,16 @@ fun main(args: Array<String>) {
 
     val botToken = args[0]
     var updateId = 0
+    val textRegex = TEXT_TEMPLATE.toRegex()
+    val updateIdRegex = UPDATE_ID_TEMPLATE.toRegex()
 
     while (true) {
         Thread.sleep(2000)
         val updates = getUpdates(botToken, updateId)
         println(updates)
 
-        val getValueByRegex = { template: String ->
-            val valueRegex = template.toRegex()
-            val matchResult = valueRegex.find(updates)
-            val value = matchResult?.groups?.get(1)?.value
-            value
-        }
-
-        updateId = getValueByRegex(UPDATE_ID_TEMPLATE)?.toInt() ?: continue
-        val text = getValueByRegex(TEXT_TEMPLATE)
+        updateId = getValueByRegex(updateIdRegex, updates)?.toInt() ?: continue
+        val text = getValueByRegex(textRegex, updates)
         println(updateId)
         println(text)
         updateId++
@@ -40,4 +35,10 @@ fun getUpdates(botToken: String, updateId: Int): String {
     val getUpdatesResponse = client.send(getUpdatesRequest, BodyHandlers.ofString())
 
     return getUpdatesResponse.body()
+}
+
+fun getValueByRegex(template: Regex, text: String): String? {
+    val matchResult = template.find(text)
+    val value = matchResult?.groups?.get(1)?.value
+    return value
 }
