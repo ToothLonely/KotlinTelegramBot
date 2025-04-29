@@ -1,12 +1,8 @@
 package org.example
 
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse.BodyHandlers
-
 const val TEXT_TEMPLATE = "\"text\":\"(.+?)\""
 const val UPDATE_ID_TEMPLATE = "\"update_id\":(\\d+)"
+const val CHAT_ID_TEMPLATE = "\"chat\":\\{\"id\":(\\d+)"
 
 fun main(args: Array<String>) {
 
@@ -14,27 +10,21 @@ fun main(args: Array<String>) {
     var updateId = 0
     val textRegex = TEXT_TEMPLATE.toRegex()
     val updateIdRegex = UPDATE_ID_TEMPLATE.toRegex()
+    val chatIdRegex = CHAT_ID_TEMPLATE.toRegex()
 
     while (true) {
         Thread.sleep(2000)
-        val updates = getUpdates(botToken, updateId)
+        val updates = TelegramBotService().getUpdates(botToken, updateId)
         println(updates)
 
         updateId = getValueByRegex(updateIdRegex, updates)?.toInt() ?: continue
         val text = getValueByRegex(textRegex, updates)
-        println(updateId)
-        println(text)
+        val chatId = getValueByRegex(chatIdRegex, updates)
+
+        TelegramBotService().sendMessage(chatId, text, botToken)
+
         updateId++
     }
-}
-
-fun getUpdates(botToken: String, updateId: Int): String {
-    val urlGetUpdate = "https://api.telegram.org/bot$botToken/getUpdates?offset=$updateId"
-    val client = HttpClient.newBuilder().build()
-    val getUpdatesRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdate)).build()
-    val getUpdatesResponse = client.send(getUpdatesRequest, BodyHandlers.ofString())
-
-    return getUpdatesResponse.body()
 }
 
 fun getValueByRegex(template: Regex, text: String): String? {
