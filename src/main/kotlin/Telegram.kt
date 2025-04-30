@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
         val chatId = getValueByRegex(chatIdRegex, updates)
         val menuData = getValueByRegex(dataRegex, updates)
 
-        if (text?.lowercase() == "menu") telegramBotService.sendMenu(chatId)
+        if (text?.lowercase() == "/start" || text?.lowercase() == "/menu") telegramBotService.sendMenu(chatId)
 
         when (menuData?.toInt()) {
             LEARN_WORDS_POINT -> telegramBotService.sendMessage(chatId, "Учить слова")
