@@ -1,9 +1,11 @@
 package org.example
 
 import java.net.URI
+import java.net.URLEncoder
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse.BodyHandlers
+import java.nio.charset.StandardCharsets
 
 const val TELEGRAM_API_URL = "https://api.telegram.org/bot"
 
@@ -22,9 +24,44 @@ class TelegramBotService(
     }
 
     fun sendMessage(chatId: String?, text: String?) {
-        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage?chat_id=$chatId&text=$text"
+        val encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8)
+        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage?chat_id=$chatId&text=$encodedText"
         val sendMessageRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
         client.send(sendMessageRequest, BodyHandlers.ofString())
+    }
+
+    fun sendMenu(chatId: String?){
+        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
+        val sendMenuBody = """
+            {
+                "chat_id": $chatId,
+                "text": "$MENU",
+                "reply_markup": {
+                    "inline_keyboard": [
+                        [
+                            {
+                                "text": "Учить слова",
+                                "callback_data": $LEARN_WORDS_POINT
+                            },
+                            {
+                                "text": "Статистика",
+                                "callback_data": $STATISTIC_POINT
+                            },
+                            {
+                                "text": "Выход",
+                                "callback_data": $EXIT_POINT
+                            }
+                        ]
+                    ]
+                }
+            }
+        """.trimIndent()
+        val sendMenuRequest = HttpRequest.newBuilder()
+            .uri(URI.create(urlSendMessage))
+            .header("Content-type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
+            .build()
+        client.send(sendMenuRequest, BodyHandlers.ofString())
     }
 
 }

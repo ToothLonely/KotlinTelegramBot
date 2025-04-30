@@ -8,6 +8,13 @@ const val NUMBER_OF_WORDS_TO_ANSWER = 4
 const val LEARN_WORDS_POINT = 1
 const val STATISTIC_POINT = 2
 const val EXIT_POINT = 0
+const val MENU = """
+                Меню:
+                1 - Учить слова
+                2 - Статистика
+                0 - Выход
+                Выберите один из вариантов (1, 2 или 0)
+            """
 
 fun Questions.transformToString(): String {
     val variants = this.variants
@@ -72,15 +79,7 @@ fun main() {
     }
 
     while (true) {
-        println(
-            """
-                Меню:
-                1 - Учить слова
-                2 - Статистика
-                0 - Выход
-                Выберите один из вариантов (1, 2 или 0)
-            """.trimIndent()
-        )
+        println(MENU.trimIndent())
 
         when (readln().toIntOrNull()) {
             LEARN_WORDS_POINT -> {

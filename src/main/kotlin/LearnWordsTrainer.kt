@@ -13,6 +13,12 @@ data class Questions(
     val correctAnswer: Word,
 )
 
+data class Word(
+    val englishWord: String,
+    val russianWord: String,
+    var correctAnswerCount: Int = 0
+)
+
 class LearnWordsTrainer {
 
     private val dictionary = loadDictionary()
