@@ -28,9 +28,12 @@ fun main(args: Array<String>) {
 
         if (text?.lowercase() == "/start" || text?.lowercase() == "/menu") telegramBotService.sendMenu(chatId)
 
+        val statistic = trainer.getStatistic()
+        val statisticMessage = "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
+
         when (menuData?.toInt()) {
             LEARN_WORDS_POINT -> telegramBotService.sendMessage(chatId, "Учить слова")
-            STATISTIC_POINT -> telegramBotService.sendMessage(chatId, "Статистика")
+            STATISTIC_POINT -> telegramBotService.sendMessage(chatId, statisticMessage)
             EXIT_POINT -> telegramBotService.sendMessage(chatId, "Выход")
         }
 
