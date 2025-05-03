@@ -30,11 +30,7 @@ fun main(args: Array<String>) {
 
 
         when (menuData?.toInt()) {
-            LEARN_WORDS_POINT -> {
-                val questions = trainer.getNextQuestion()
-                if (questions == null) telegramBotService.sendMessage(chatId, "Все слова уже выучены")
-                else telegramBotService.sendQuestion(chatId, questions)
-            }
+            LEARN_WORDS_POINT -> checkNextQuestionAndSend(trainer, telegramBotService, chatId)
 
             STATISTIC_POINT -> {
                 val statistic = trainer.getStatistic()
@@ -54,4 +50,14 @@ fun getValueByRegex(template: Regex, text: String): String? {
     val matchResult = template.find(text)
     val value = matchResult?.groups?.get(1)?.value
     return value
+}
+
+fun checkNextQuestionAndSend(
+    trainer: LearnWordsTrainer,
+    telegramBotService: TelegramBotService,
+    chatId: String?
+) {
+    val questions = trainer.getNextQuestion()
+    if (questions == null) telegramBotService.sendMessage(chatId, "Все слова уже выучены")
+    else telegramBotService.sendQuestion(chatId, questions)
 }
