@@ -30,9 +30,9 @@ class TelegramBotService(
         client.send(sendMessageRequest, BodyHandlers.ofString())
     }
 
-    fun sendMenu(chatId: String?){
+    fun sendMenu(chatId: String?) {
         val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
-        val sendMenuBody = """
+        val menuBody = """
             {
                 "chat_id": $chatId,
                 "text": "$MENU",
@@ -59,9 +59,40 @@ class TelegramBotService(
         val sendMenuRequest = HttpRequest.newBuilder()
             .uri(URI.create(urlSendMessage))
             .header("Content-type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
+            .POST(HttpRequest.BodyPublishers.ofString(menuBody))
             .build()
         client.send(sendMenuRequest, BodyHandlers.ofString())
+    }
+
+    fun sendQuestion(chatId: String?, question: Questions) {
+        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
+        val inlineKeyboardsVariants = question.variants.mapIndexed { index, word ->
+            """
+                {
+                    "text": "${word.russianWord}",
+                    "callback_data": $index
+                }
+            """.trimIndent()
+        }.joinToString(separator = ",\n")
+        val questionBody = """
+            {
+                "chat_id": $chatId,
+                "text": "${question.correctAnswer.englishWord}: ",
+                "reply_markup": {
+                    "inline_keyboard": [
+                        [
+                            $inlineKeyboardsVariants
+                        ]
+                    ]
+                }
+            }
+        """.trimIndent()
+        val sendQuestionRequest = HttpRequest.newBuilder()
+            .uri(URI.create(urlSendMessage))
+            .header("Content-type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(questionBody))
+            .build()
+        client.send(sendQuestionRequest, BodyHandlers.ofString())
     }
 
 }

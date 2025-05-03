@@ -30,12 +30,19 @@ fun main(args: Array<String>) {
 
 
         when (menuData?.toInt()) {
-            LEARN_WORDS_POINT -> telegramBotService.sendMessage(chatId, "Учить слова")
+            LEARN_WORDS_POINT -> {
+                val questions = trainer.getNextQuestion()
+                if (questions == null) telegramBotService.sendMessage(chatId, "Все слова уже выучены")
+                else telegramBotService.sendQuestion(chatId, questions)
+            }
+
             STATISTIC_POINT -> {
                 val statistic = trainer.getStatistic()
-                val statisticMessage = "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
+                val statisticMessage =
+                    "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
                 telegramBotService.sendMessage(chatId, statisticMessage)
             }
+
             EXIT_POINT -> telegramBotService.sendMessage(chatId, "Выход")
         }
 
