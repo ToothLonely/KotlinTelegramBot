@@ -5,6 +5,7 @@ const val UPDATE_ID_TEMPLATE = "\"update_id\":(\\d+)"
 const val CHAT_ID_TEMPLATE = "\"chat\":\\{\"id\":(\\d+)"
 const val DATA_TEMPLATE = "\"data\":\"(.+?)\""
 const val TELEGRAM_MENU = "Меню:"
+const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
 
 fun main(args: Array<String>) {
 

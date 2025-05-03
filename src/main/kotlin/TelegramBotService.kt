@@ -60,7 +60,7 @@ class TelegramBotService(
             """
                 {
                     "text": "${word.russianWord}",
-                    "callback_data": $index
+                    "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX$index"
                 }
             """.trimIndent()
         }.joinToString(separator = ",\n")
