@@ -14,6 +14,7 @@ class TelegramBotService(
 ) {
 
     private val client = HttpClient.newBuilder().build()
+    private val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
 
     fun getUpdates(updateId: Int): String {
         val urlGetUpdate = "$TELEGRAM_API_URL$botToken/getUpdates?offset=$updateId"
@@ -25,13 +26,12 @@ class TelegramBotService(
 
     fun sendMessage(chatId: String?, text: String?) {
         val encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8)
-        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage?chat_id=$chatId&text=$encodedText"
+        val urlSendMessage = "$urlSendMessage?chat_id=$chatId&text=$encodedText"
         val sendMessageRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
         client.send(sendMessageRequest, BodyHandlers.ofString())
     }
 
     fun sendMenu(chatId: String?) {
-        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
         val menuBody = """
             {
                 "chat_id": $chatId,
@@ -56,16 +56,10 @@ class TelegramBotService(
                 }
             }
         """.trimIndent()
-        val sendMenuRequest = HttpRequest.newBuilder()
-            .uri(URI.create(urlSendMessage))
-            .header("Content-type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(menuBody))
-            .build()
-        client.send(sendMenuRequest, BodyHandlers.ofString())
+        sendPOST(urlSendMessage, menuBody)
     }
 
     fun sendQuestion(chatId: String?, question: Questions) {
-        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
         val inlineKeyboardsVariants = question.variants.mapIndexed { index, word ->
             """
                 {
@@ -87,12 +81,16 @@ class TelegramBotService(
                 }
             }
         """.trimIndent()
-        val sendQuestionRequest = HttpRequest.newBuilder()
-            .uri(URI.create(urlSendMessage))
-            .header("Content-type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(questionBody))
-            .build()
-        client.send(sendQuestionRequest, BodyHandlers.ofString())
+        sendPOST(urlSendMessage, questionBody)
+
     }
 
+    private fun sendPOST(url: String, body: String){
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("Content-type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build()
+        client.send(request, BodyHandlers.ofString())
+    }
 }
