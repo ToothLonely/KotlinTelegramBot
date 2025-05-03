@@ -35,7 +35,7 @@ class TelegramBotService(
         val menuBody = """
             {
                 "chat_id": $chatId,
-                "text": "$MENU",
+                "text": "$TELEGRAM_MENU",
                 "reply_markup": {
                     "inline_keyboard": [
                         [
@@ -46,10 +46,6 @@ class TelegramBotService(
                             {
                                 "text": "Статистика",
                                 "callback_data": $STATISTIC_POINT
-                            },
-                            {
-                                "text": "Выход",
-                                "callback_data": $EXIT_POINT
                             }
                         ]
                     ]

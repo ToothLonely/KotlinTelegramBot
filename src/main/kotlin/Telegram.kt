@@ -4,6 +4,7 @@ const val TEXT_TEMPLATE = "\"text\":\"(.+?)\""
 const val UPDATE_ID_TEMPLATE = "\"update_id\":(\\d+)"
 const val CHAT_ID_TEMPLATE = "\"chat\":\\{\"id\":(\\d+)"
 const val DATA_TEMPLATE = "\"data\":\"(.+?)\""
+const val TELEGRAM_MENU = "Меню:"
 
 fun main(args: Array<String>) {
 
@@ -38,8 +39,6 @@ fun main(args: Array<String>) {
                     "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
                 telegramBotService.sendMessage(chatId, statisticMessage)
             }
-
-            EXIT_POINT -> telegramBotService.sendMessage(chatId, "Выход")
         }
 
         updateId++
