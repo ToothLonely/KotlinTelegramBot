@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
 
         updateId = getValueByRegex(updateIdRegex, updates)?.toInt() ?: continue
         val text = getValueByRegex(textRegex, updates)
-        val chatId = getValueByRegex(chatIdRegex, updates)
+        val chatId = getValueByRegex(chatIdRegex, updates) ?: continue
         val menuData = getValueByRegex(dataRegex, updates)
 
         if (text?.lowercase() == "/start" || text?.lowercase() == "/menu") telegramBotService.sendMenu(chatId)
@@ -55,7 +55,7 @@ fun getValueByRegex(template: Regex, text: String): String? {
 fun checkNextQuestionAndSend(
     trainer: LearnWordsTrainer,
     telegramBotService: TelegramBotService,
-    chatId: String?
+    chatId: String
 ) {
     val questions = trainer.getNextQuestion()
     if (questions == null) telegramBotService.sendMessage(chatId, "Все слова уже выучены")

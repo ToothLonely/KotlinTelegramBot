@@ -24,14 +24,14 @@ class TelegramBotService(
         return getUpdatesResponse.body()
     }
 
-    fun sendMessage(chatId: String?, text: String?) {
+    fun sendMessage(chatId: String, text: String?) {
         val encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8)
         val urlSendMessage = "$urlSendMessage?chat_id=$chatId&text=$encodedText"
         val sendMessageRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
         client.send(sendMessageRequest, BodyHandlers.ofString())
     }
 
-    fun sendMenu(chatId: String?) {
+    fun sendMenu(chatId: String) {
         val menuBody = """
             {
                 "chat_id": $chatId,
@@ -55,7 +55,7 @@ class TelegramBotService(
         sendPOST(urlSendMessage, menuBody)
     }
 
-    fun sendQuestion(chatId: String?, question: Questions) {
+    fun sendQuestion(chatId: String, question: Questions) {
         val inlineKeyboardsVariants = question.variants.mapIndexed { index, word ->
             """
                 {
@@ -81,7 +81,7 @@ class TelegramBotService(
 
     }
 
-    private fun sendPOST(url: String, body: String){
+    private fun sendPOST(url: String, body: String) {
         val request = HttpRequest.newBuilder()
             .uri(URI.create(url))
             .header("Content-type", "application/json")
