@@ -14,6 +14,7 @@ class TelegramBotService(
 ) {
 
     private val client = HttpClient.newBuilder().build()
+    private val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
 
     fun getUpdates(updateId: Int): String {
         val urlGetUpdate = "$TELEGRAM_API_URL$botToken/getUpdates?offset=$updateId"
@@ -23,19 +24,18 @@ class TelegramBotService(
         return getUpdatesResponse.body()
     }
 
-    fun sendMessage(chatId: String?, text: String?) {
+    fun sendMessage(chatId: String, text: String?) {
         val encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8)
-        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage?chat_id=$chatId&text=$encodedText"
+        val urlSendMessage = "$urlSendMessage?chat_id=$chatId&text=$encodedText"
         val sendMessageRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
         client.send(sendMessageRequest, BodyHandlers.ofString())
     }
 
-    fun sendMenu(chatId: String?){
-        val urlSendMessage = "$TELEGRAM_API_URL$botToken/sendMessage"
-        val sendMenuBody = """
+    fun sendMenu(chatId: String) {
+        val menuBody = """
             {
                 "chat_id": $chatId,
-                "text": "$MENU",
+                "text": "$TELEGRAM_MENU",
                 "reply_markup": {
                     "inline_keyboard": [
                         [
@@ -46,22 +46,47 @@ class TelegramBotService(
                             {
                                 "text": "Статистика",
                                 "callback_data": $STATISTIC_POINT
-                            },
-                            {
-                                "text": "Выход",
-                                "callback_data": $EXIT_POINT
                             }
                         ]
                     ]
                 }
             }
         """.trimIndent()
-        val sendMenuRequest = HttpRequest.newBuilder()
-            .uri(URI.create(urlSendMessage))
-            .header("Content-type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(sendMenuBody))
-            .build()
-        client.send(sendMenuRequest, BodyHandlers.ofString())
+        sendPOST(urlSendMessage, menuBody)
     }
 
+    fun sendQuestion(chatId: String, question: Questions) {
+        val inlineKeyboardsVariants = question.variants.mapIndexed { index, word ->
+            """
+                {
+                    "text": "${word.russianWord}",
+                    "callback_data": "$CALLBACK_DATA_ANSWER_PREFIX$index"
+                }
+            """.trimIndent()
+        }.joinToString(separator = ",\n")
+        val questionBody = """
+            {
+                "chat_id": $chatId,
+                "text": "${question.correctAnswer.englishWord}: ",
+                "reply_markup": {
+                    "inline_keyboard": [
+                        [
+                            $inlineKeyboardsVariants
+                        ]
+                    ]
+                }
+            }
+        """.trimIndent()
+        sendPOST(urlSendMessage, questionBody)
+
+    }
+
+    private fun sendPOST(url: String, body: String) {
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("Content-type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build()
+        client.send(request, BodyHandlers.ofString())
+    }
 }
