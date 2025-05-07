@@ -75,7 +75,7 @@ class LearnWordsTrainer {
 
     fun checkAnswer(userAnswerInput: Int, questions: Questions): Boolean {
         val correctAnswerId =
-            questions.variants.indexOf(questions.correctAnswer) + DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX
+            questions.variants.indexOf(questions.correctAnswer)
         when (userAnswerInput) {
             correctAnswerId -> {
                 questions.correctAnswer.correctAnswerCount++

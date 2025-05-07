@@ -17,6 +17,8 @@ fun main(args: Array<String>) {
     val telegramBotService = TelegramBotService(args[0])
 
     val trainer = LearnWordsTrainer()
+    var questions: Questions? = null
+    var userAnswerInput: String?
 
     while (true) {
         Thread.sleep(2000)
@@ -26,19 +28,33 @@ fun main(args: Array<String>) {
         updateId = getValueByRegex(updateIdRegex, updates)?.toInt() ?: continue
         val text = getValueByRegex(textRegex, updates)
         val chatId = getValueByRegex(chatIdRegex, updates) ?: continue
-        val menuData = getValueByRegex(dataRegex, updates)
+        val inputData = getValueByRegex(dataRegex, updates)
 
         if (text?.lowercase() == "/start" || text?.lowercase() == "/menu") telegramBotService.sendMenu(chatId)
+        userAnswerInput = inputData?.substringAfter(CALLBACK_DATA_ANSWER_PREFIX)
 
-
-        when (menuData?.toInt()) {
-            LEARN_WORDS_POINT -> checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+        when (inputData) {
+            LEARN_WORDS_POINT -> {
+                questions = checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+            }
 
             STATISTIC_POINT -> {
                 val statistic = trainer.getStatistic()
                 val statisticMessage =
                     "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
                 telegramBotService.sendMessage(chatId, statisticMessage)
+                telegramBotService.sendMenu(chatId)
+            }
+
+            "$CALLBACK_DATA_ANSWER_PREFIX$userAnswerInput" -> {
+                when (trainer.checkAnswer(userAnswerInput!!.toInt(), questions!!)) {
+                    true -> telegramBotService.sendMessage(chatId, "Правильно")
+                    false -> telegramBotService.sendMessage(
+                        chatId,
+                        "\"Неправильно! ${questions.correctAnswer.englishWord} - это ${questions.correctAnswer.russianWord}\""
+                    )
+                }
+                questions = checkNextQuestionAndSend(trainer, telegramBotService, chatId)
             }
         }
 
@@ -56,8 +72,9 @@ fun checkNextQuestionAndSend(
     trainer: LearnWordsTrainer,
     telegramBotService: TelegramBotService,
     chatId: String
-) {
+): Questions? {
     val questions = trainer.getNextQuestion()
     if (questions == null) telegramBotService.sendMessage(chatId, "Все слова уже выучены")
     else telegramBotService.sendQuestion(chatId, questions)
+    return questions
 }
