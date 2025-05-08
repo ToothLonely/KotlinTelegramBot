@@ -2,11 +2,9 @@ package org.example
 
 const val FILENAME = "words.txt"
 const val ONE_HUNDRED_PERCENT = 100
-const val MINIMUM_CORRECT_ANSWERS = 3
 const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
-const val NUMBER_OF_WORDS_TO_ANSWER = 4
-const val LEARN_WORDS_POINT = 1
-const val STATISTIC_POINT = 2
+const val LEARN_WORDS_POINT = "learn_words"
+const val STATISTIC_POINT = "show_statistic"
 const val EXIT_POINT = 0
 const val MENU = """
                 Меню:
@@ -63,7 +61,7 @@ fun learnWords(trainer: LearnWordsTrainer) {
 
         if (userAnswerInput == EXIT_POINT) break
 
-        when (trainer.checkAnswer(userAnswerInput, questions)) {
+        when (trainer.checkAnswer(userAnswerInput)) {
             true -> println("Правильно!")
             false -> println("Неправильно! ${questions.correctAnswer.englishWord} - это ${questions.correctAnswer.russianWord}")
         }
@@ -81,7 +79,7 @@ fun main() {
     while (true) {
         println(MENU.trimIndent())
 
-        when (readln().toIntOrNull()) {
+        when (readln()) {
             LEARN_WORDS_POINT -> {
                 learnWords(trainer)
             }
@@ -90,7 +88,7 @@ fun main() {
                 showStatistic(trainer)
             }
 
-            EXIT_POINT -> break
+            EXIT_POINT.toString() -> break
 
             else -> println("Введите число 1, 2 или 0")
         }

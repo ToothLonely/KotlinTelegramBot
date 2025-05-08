@@ -6,6 +6,8 @@ const val CHAT_ID_TEMPLATE = "\"chat\":\\{\"id\":(\\d+)"
 const val DATA_TEMPLATE = "\"data\":\"(.+?)\""
 const val TELEGRAM_MENU = "Меню:"
 const val CALLBACK_DATA_ANSWER_PREFIX = "answer_"
+const val MENU_COMMAND = "/menu"
+const val START_COMMAND = "/start"
 
 fun main(args: Array<String>) {
 
@@ -26,19 +28,37 @@ fun main(args: Array<String>) {
         updateId = getValueByRegex(updateIdRegex, updates)?.toInt() ?: continue
         val text = getValueByRegex(textRegex, updates)
         val chatId = getValueByRegex(chatIdRegex, updates) ?: continue
-        val menuData = getValueByRegex(dataRegex, updates)
+        val inputData = getValueByRegex(dataRegex, updates)
 
-        if (text?.lowercase() == "/start" || text?.lowercase() == "/menu") telegramBotService.sendMenu(chatId)
+        when {
+            text?.lowercase() == START_COMMAND || text?.lowercase() == MENU_COMMAND -> {
+                telegramBotService.sendMenu(chatId)
+            }
 
+            inputData == LEARN_WORDS_POINT -> {
+                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+            }
 
-        when (menuData?.toInt()) {
-            LEARN_WORDS_POINT -> checkNextQuestionAndSend(trainer, telegramBotService, chatId)
-
-            STATISTIC_POINT -> {
+            inputData == STATISTIC_POINT -> {
                 val statistic = trainer.getStatistic()
                 val statisticMessage =
                     "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
                 telegramBotService.sendMessage(chatId, statisticMessage)
+                Thread.sleep(1000)
+                telegramBotService.sendMenu(chatId)
+            }
+
+            inputData?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true -> {
+                val userAnswerInput = inputData.substringAfter(CALLBACK_DATA_ANSWER_PREFIX)
+                when (trainer.checkAnswer(userAnswerInput.toInt())) {
+                    true -> telegramBotService.sendMessage(chatId, "Правильно")
+                    false -> telegramBotService.sendMessage(
+                        chatId,
+                        "Неправильно! ${trainer.question.correctAnswer.englishWord} - это ${trainer.question.correctAnswer.russianWord}"
+                    )
+                }
+                Thread.sleep(1000)
+                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
             }
         }
 
