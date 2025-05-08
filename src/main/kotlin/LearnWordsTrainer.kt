@@ -22,6 +22,9 @@ data class Word(
 class LearnWordsTrainer {
 
     private val dictionary = loadDictionary()
+    private val minimumCorrectAnswers = 3
+    private val numberOfWordsToAnswer = 4
+    lateinit var question: Questions
 
     private fun loadDictionary(): List<Word> {
         try {
@@ -42,7 +45,7 @@ class LearnWordsTrainer {
     }
 
     private fun saveDictionary(dictionary: List<Word>) {
-        val wordsFile = File("words.txt")
+        val wordsFile = File(FILENAME)
         wordsFile.writeText("")
         dictionary.forEach { word ->
             wordsFile.appendText("${word.englishWord}|${word.russianWord}|${word.correctAnswerCount}\n")
@@ -50,35 +53,38 @@ class LearnWordsTrainer {
     }
 
     fun getStatistic(): Statistics {
-        val learnedCount = dictionary.filter { it.correctAnswerCount >= MINIMUM_CORRECT_ANSWERS }.size
+        val learnedCount = dictionary.filter { it.correctAnswerCount >= minimumCorrectAnswers }.size
         val totalCount = dictionary.size
         val percent = (learnedCount.toDouble() / totalCount) * ONE_HUNDRED_PERCENT
         return Statistics(learnedCount, totalCount, percent)
     }
 
     fun getNextQuestion(): Questions? {
-        val notLearnedList = dictionary.filter { it.correctAnswerCount < MINIMUM_CORRECT_ANSWERS }
+        val notLearnedList = dictionary.filter { it.correctAnswerCount < minimumCorrectAnswers }
         if (notLearnedList.isEmpty()) return null
-        var questionWords = notLearnedList.shuffled().take(NUMBER_OF_WORDS_TO_ANSWER)
+
+        var questionWords = notLearnedList.shuffled().take(numberOfWordsToAnswer)
         val answeredWord = questionWords.random()
-        if (questionWords.size <= NUMBER_OF_WORDS_TO_ANSWER) {
-            val numberOfWordsToAdd = NUMBER_OF_WORDS_TO_ANSWER - questionWords.size
+
+        if (questionWords.size <= numberOfWordsToAnswer) {
+            val numberOfWordsToAdd = numberOfWordsToAnswer - questionWords.size
             val learnedWords = dictionary
-                .filter { it.correctAnswerCount >= MINIMUM_CORRECT_ANSWERS }
+                .filter { it.correctAnswerCount >= minimumCorrectAnswers }
                 .shuffled()
                 .take(numberOfWordsToAdd)
             questionWords = questionWords.plus(learnedWords)
         }
 
-        return Questions(questionWords, answeredWord)
+        question = Questions(questionWords, answeredWord)
+        return question
     }
 
-    fun checkAnswer(userAnswerInput: Int, questions: Questions): Boolean {
+    fun checkAnswer(userAnswerInput: Int): Boolean {
         val correctAnswerId =
-            questions.variants.indexOf(questions.correctAnswer)
+            question.variants.indexOf(question.correctAnswer)
         when (userAnswerInput) {
             correctAnswerId -> {
-                questions.correctAnswer.correctAnswerCount++
+                question.correctAnswer.correctAnswerCount++
                 saveDictionary(dictionary)
                 return true
             }

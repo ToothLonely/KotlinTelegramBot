@@ -17,7 +17,6 @@ fun main(args: Array<String>) {
     val telegramBotService = TelegramBotService(args[0])
 
     val trainer = LearnWordsTrainer()
-    var questions: Questions? = null
     var userAnswerInput: String?
 
     while (true) {
@@ -35,7 +34,7 @@ fun main(args: Array<String>) {
 
         when (inputData) {
             LEARN_WORDS_POINT -> {
-                questions = checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
             }
 
             STATISTIC_POINT -> {
@@ -47,14 +46,14 @@ fun main(args: Array<String>) {
             }
 
             "$CALLBACK_DATA_ANSWER_PREFIX$userAnswerInput" -> {
-                when (trainer.checkAnswer(userAnswerInput!!.toInt(), questions!!)) {
+                when (trainer.checkAnswer(userAnswerInput!!.toInt())) {
                     true -> telegramBotService.sendMessage(chatId, "Правильно")
                     false -> telegramBotService.sendMessage(
                         chatId,
-                        "\"Неправильно! ${questions.correctAnswer.englishWord} - это ${questions.correctAnswer.russianWord}\""
+                        "\"Неправильно! ${trainer.question.correctAnswer.englishWord} - это ${trainer.question.correctAnswer.russianWord}\""
                     )
                 }
-                questions = checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
             }
         }
 
@@ -72,9 +71,8 @@ fun checkNextQuestionAndSend(
     trainer: LearnWordsTrainer,
     telegramBotService: TelegramBotService,
     chatId: String
-): Questions? {
+) {
     val questions = trainer.getNextQuestion()
     if (questions == null) telegramBotService.sendMessage(chatId, "Все слова уже выучены")
     else telegramBotService.sendQuestion(chatId, questions)
-    return questions
 }
