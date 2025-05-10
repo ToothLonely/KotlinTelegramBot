@@ -18,7 +18,6 @@ fun main(args: Array<String>) {
         println(responseString)
 
         val response = json.decodeFromString<Response>(responseString)
-        println(response)
 
         val updates = response.result
         val firstUpdate = updates.firstOrNull() ?: continue
