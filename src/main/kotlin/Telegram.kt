@@ -10,16 +10,12 @@ fun main(args: Array<String>) {
     var updateId = 0L
     val telegramBotService = TelegramBotService(args[0])
     val trainer = LearnWordsTrainer()
-    val json = telegramBotService.json
 
     while (true) {
         Thread.sleep(2000)
-        val responseString = telegramBotService.getUpdates(updateId.toInt())
-        println(responseString)
+        val updates = telegramBotService.getUpdates(updateId.toInt())
+        println(updates)
 
-        val response = json.decodeFromString<Response>(responseString)
-
-        val updates = response.result
         val firstUpdate = updates.firstOrNull() ?: continue
 
         updateId = firstUpdate.updateId
