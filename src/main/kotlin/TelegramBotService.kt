@@ -14,7 +14,7 @@ class TelegramBotService(
     private val botToken: String
 ) {
 
-    val json = Json {
+    private val json = Json {
         ignoreUnknownKeys = true
     }
     private val client = HttpClient.newBuilder().build()
@@ -44,6 +44,9 @@ class TelegramBotService(
                     listOf(
                         InlineKeyboard(LEARN_WORDS, LEARN_WORDS),
                         InlineKeyboard(STATISTIC, STATISTIC)
+                    ),
+                    listOf(
+                        InlineKeyboard(RESET_PROGRESS, RESET_PROGRESS)
                     )
                 )
             )

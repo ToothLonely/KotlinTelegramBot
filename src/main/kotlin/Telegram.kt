@@ -7,55 +7,69 @@ const val START_COMMAND = "/start"
 
 fun main(args: Array<String>) {
 
-    var updateId = 0L
+    var lastUpdateId = 0L
     val telegramBotService = TelegramBotService(args[0])
-    val trainer = LearnWordsTrainer()
+    val trainers = HashMap<Long, LearnWordsTrainer>()
 
     while (true) {
         Thread.sleep(2000)
-        val updates = telegramBotService.getUpdates(updateId.toInt())
+        val updates = telegramBotService.getUpdates(lastUpdateId.toInt())
+        if (updates.isEmpty()) continue
         println(updates)
 
-        val firstUpdate = updates.firstOrNull() ?: continue
+        val sortedUpdates = updates.sortedBy { it.updateId }
+        sortedUpdates.forEach { handleUpdate(it, trainers, telegramBotService) }
 
-        updateId = firstUpdate.updateId
-        val text = firstUpdate.message?.text
-        val chatId = firstUpdate.message?.chat?.chatId ?: firstUpdate.callbackQuery?.message?.chat?.chatId ?: continue
-        val inputData = firstUpdate.callbackQuery?.data
+        lastUpdateId = sortedUpdates.last().updateId + 1
 
-        when {
-            text?.lowercase() == START_COMMAND || text?.lowercase() == MENU_COMMAND || inputData == MENU_COMMAND -> {
-                telegramBotService.sendMenu(chatId)
-            }
+    }
+}
 
-            inputData == LEARN_WORDS -> {
-                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
-            }
+fun handleUpdate(update: Update, trainers: HashMap<Long, LearnWordsTrainer>, telegramBotService: TelegramBotService) {
 
-            inputData == STATISTIC -> {
-                val statistic = trainer.getStatistic()
-                val statisticMessage =
-                    "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
-                telegramBotService.sendMessage(chatId, statisticMessage)
-                Thread.sleep(1000)
-                telegramBotService.sendMenu(chatId)
-            }
+    val text = update.message?.text
+    val chatId = update.message?.chat?.chatId ?: update.callbackQuery?.message?.chat?.chatId ?: return
+    val inputData = update.callbackQuery?.data
 
-            inputData?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true -> {
-                val userAnswerInput = inputData.substringAfter(CALLBACK_DATA_ANSWER_PREFIX)
-                when (trainer.checkAnswer(userAnswerInput.toInt())) {
-                    true -> telegramBotService.sendMessage(chatId, "Правильно")
-                    false -> telegramBotService.sendMessage(
-                        chatId,
-                        "Неправильно! ${trainer.question.correctAnswer.englishWord} - это ${trainer.question.correctAnswer.russianWord}"
-                    )
-                }
-                Thread.sleep(1000)
-                checkNextQuestionAndSend(trainer, telegramBotService, chatId)
-            }
+    val trainer = trainers.getOrPut(chatId) {
+        LearnWordsTrainer(filename = "$chatId.txt")
+    }
+
+    when {
+        text?.lowercase() == START_COMMAND || text?.lowercase() == MENU_COMMAND || inputData == MENU_COMMAND -> {
+            telegramBotService.sendMenu(chatId)
         }
 
-        updateId++
+        inputData == LEARN_WORDS -> {
+            checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+        }
+
+        inputData == STATISTIC -> {
+            val statistic = trainer.getStatistic()
+            val statisticMessage =
+                "Выучено ${statistic.learnedCount} из ${statistic.totalCount} слов | ${statistic.percent}%"
+            telegramBotService.sendMessage(chatId, statisticMessage)
+            telegramBotService.sendMenu(chatId)
+        }
+
+        inputData?.startsWith(CALLBACK_DATA_ANSWER_PREFIX) == true -> {
+            val userAnswerInput = inputData.substringAfter(CALLBACK_DATA_ANSWER_PREFIX)
+            when (trainer.checkAnswer(userAnswerInput.toInt())) {
+                true -> telegramBotService.sendMessage(chatId, "Правильно")
+                false -> telegramBotService.sendMessage(
+                    chatId,
+                    "Неправильно! ${trainer.question.correctAnswer.englishWord} - это ${trainer.question.correctAnswer.russianWord}"
+                )
+            }
+            Thread.sleep(1000)
+            checkNextQuestionAndSend(trainer, telegramBotService, chatId)
+        }
+
+        inputData == RESET_PROGRESS -> {
+            trainer.resetProgress()
+            telegramBotService.sendMessage(chatId, "Прогресс сброшен")
+            telegramBotService.sendMenu(chatId)
+        }
     }
 }
 

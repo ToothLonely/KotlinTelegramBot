@@ -1,10 +1,10 @@
 package org.example
 
-const val FILENAME = "words.txt"
 const val ONE_HUNDRED_PERCENT = 100
 const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
 const val LEARN_WORDS = "Учить слова"
 const val STATISTIC = "Статистика"
+const val RESET_PROGRESS = "Сбросить статистику"
 const val EXIT_POINT = 0
 const val MENU = """
                 Меню:
