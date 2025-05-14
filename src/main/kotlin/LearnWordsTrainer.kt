@@ -19,7 +19,7 @@ data class Word(
     var correctAnswerCount: Int = 0
 )
 
-class LearnWordsTrainer {
+class LearnWordsTrainer(val filename: String = "words.txt") {
 
     private val dictionary = loadDictionary()
     private val minimumCorrectAnswers = 3
@@ -29,10 +29,13 @@ class LearnWordsTrainer {
     private fun loadDictionary(): List<Word> {
         try {
 
-            val words = File(FILENAME)
+            val wordsFile = File(filename)
+            if(!wordsFile.exists()){
+                File("words.txt").copyTo(wordsFile)
+            }
             val dictionary = mutableListOf<Word>()
 
-            words.readLines().forEach {
+            wordsFile.readLines().forEach {
                 val line = it.split('|')
                 val word = Word(line[0], line[1], line.getOrNull(2)?.toIntOrNull() ?: 0)
 
@@ -44,8 +47,8 @@ class LearnWordsTrainer {
         }
     }
 
-    private fun saveDictionary(dictionary: List<Word>) {
-        val wordsFile = File(FILENAME)
+    private fun saveDictionary() {
+        val wordsFile = File(filename)
         wordsFile.writeText("")
         dictionary.forEach { word ->
             wordsFile.appendText("${word.englishWord}|${word.russianWord}|${word.correctAnswerCount}\n")
@@ -85,11 +88,16 @@ class LearnWordsTrainer {
         when (userAnswerInput) {
             correctAnswerId -> {
                 question.correctAnswer.correctAnswerCount++
-                saveDictionary(dictionary)
+                saveDictionary()
                 return true
             }
 
             else -> return false
         }
+    }
+
+    fun resetProgress(){
+        dictionary.forEach { it.correctAnswerCount = 0 }
+        saveDictionary()
     }
 }
