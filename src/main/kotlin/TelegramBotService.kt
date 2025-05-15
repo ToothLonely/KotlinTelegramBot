@@ -14,7 +14,7 @@ class TelegramBotService(
     private val botToken: String
 ) {
 
-    val json = Json {
+    private val json = Json {
         ignoreUnknownKeys = true
     }
     private val client = HttpClient.newBuilder().build()
@@ -28,7 +28,7 @@ class TelegramBotService(
         return json.decodeFromString<Response>(getUpdatesResponseString).result
     }
 
-    fun sendMessage(chatId: Long, text: String?) {
+    fun sendMessage(text: String?, chatId: Long) {
         val encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8)
         val urlSendMessage = "$urlSendMessage?chat_id=$chatId&text=$encodedText"
         val sendMessageRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
@@ -44,6 +44,9 @@ class TelegramBotService(
                     listOf(
                         InlineKeyboard(LEARN_WORDS, LEARN_WORDS),
                         InlineKeyboard(STATISTIC, STATISTIC)
+                    ),
+                    listOf(
+                        InlineKeyboard(RESET_PROGRESS, RESET_PROGRESS)
                     )
                 )
             )
@@ -53,7 +56,7 @@ class TelegramBotService(
         sendPOST(urlSendMessage, requestBodyString)
     }
 
-    fun sendQuestion(chatId: Long, question: Questions) {
+    fun sendQuestion(question: Questions, chatId: Long) {
         val inlineKeyboardVariants = question.variants.mapIndexed { index, word ->
             InlineKeyboard(
                 text = word.russianWord,
