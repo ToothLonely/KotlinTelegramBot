@@ -28,8 +28,9 @@ class TelegramBotService(
 
         try {
             val getUpdatesResponseString = client.send(getUpdatesRequest, BodyHandlers.ofString()).body()
+            println(getUpdatesResponseString)
             result = json.decodeFromString<Response>(getUpdatesResponseString).result
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             println("Попытка отказа!")
             result = emptyList()
         }
@@ -43,7 +44,7 @@ class TelegramBotService(
         val sendMessageRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
         try {
             client.send(sendMessageRequest, BodyHandlers.ofString())
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             println("Попытка отказа!")
         }
     }
@@ -96,7 +97,7 @@ class TelegramBotService(
             .build()
         try {
             client.send(request, BodyHandlers.ofString())
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             println("Попытка отказа!")
         }
     }
