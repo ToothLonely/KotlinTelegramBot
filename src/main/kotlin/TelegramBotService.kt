@@ -30,6 +30,7 @@ class TelegramBotService(
             val getUpdatesResponseString = client.send(getUpdatesRequest, BodyHandlers.ofString()).body()
             result = json.decodeFromString<Response>(getUpdatesResponseString).result
         } catch (e: IOException) {
+            println("Попытка отказа!")
             result = emptyList()
         }
 
@@ -40,7 +41,11 @@ class TelegramBotService(
         val encodedText = URLEncoder.encode(text, StandardCharsets.UTF_8)
         val urlSendMessage = "$urlSendMessage?chat_id=$chatId&text=$encodedText"
         val sendMessageRequest = HttpRequest.newBuilder().uri(URI.create(urlSendMessage)).build()
-        client.send(sendMessageRequest, BodyHandlers.ofString())
+        try {
+            client.send(sendMessageRequest, BodyHandlers.ofString())
+        } catch (e: IOException) {
+            println("Попытка отказа!")
+        }
     }
 
     fun sendMenu(chatId: Long) {
@@ -89,6 +94,10 @@ class TelegramBotService(
             .header("Content-type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build()
-        client.send(request, BodyHandlers.ofString())
+        try {
+            client.send(request, BodyHandlers.ofString())
+        } catch (e: IOException) {
+            println("Попытка отказа!")
+        }
     }
 }
