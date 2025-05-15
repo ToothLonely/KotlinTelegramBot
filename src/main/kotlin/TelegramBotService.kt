@@ -1,6 +1,7 @@
 package org.example
 
 import kotlinx.serialization.json.Json
+import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
@@ -23,9 +24,16 @@ class TelegramBotService(
     fun getUpdates(updateId: Int): List<Update> {
         val urlGetUpdate = "$TELEGRAM_API_URL$botToken/getUpdates?offset=$updateId"
         val getUpdatesRequest = HttpRequest.newBuilder().uri(URI.create(urlGetUpdate)).build()
-        val getUpdatesResponseString = client.send(getUpdatesRequest, BodyHandlers.ofString()).body()
+        var result: List<Update>
 
-        return json.decodeFromString<Response>(getUpdatesResponseString).result
+        try {
+            val getUpdatesResponseString = client.send(getUpdatesRequest, BodyHandlers.ofString()).body()
+            result = json.decodeFromString<Response>(getUpdatesResponseString).result
+        } catch (e: IOException) {
+            result = emptyList()
+        }
+
+        return result
     }
 
     fun sendMessage(text: String?, chatId: Long) {
