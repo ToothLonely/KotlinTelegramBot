@@ -1,7 +1,6 @@
 package org.example
 
 import kotlinx.serialization.json.Json
-import java.io.IOException
 import java.net.URI
 import java.net.URLEncoder
 import java.net.http.HttpClient
@@ -28,7 +27,6 @@ class TelegramBotService(
 
         try {
             val getUpdatesResponseString = client.send(getUpdatesRequest, BodyHandlers.ofString()).body()
-            println(getUpdatesResponseString)
             result = json.decodeFromString<Response>(getUpdatesResponseString).result
         } catch (e: Exception) {
             println("Попытка отказа!")

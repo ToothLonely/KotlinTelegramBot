@@ -32,7 +32,8 @@ data class Message(
 @Serializable
 data class Chat(
     @SerialName("id")
-    val chatId: Long
+    val chatId: Long,
+    val username: String
 )
 
 @Serializable

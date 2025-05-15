@@ -30,9 +30,10 @@ fun handleUpdate(update: Update, trainers: HashMap<Long, LearnWordsTrainer>, tel
     val text = update.message?.text
     val chatId = update.message?.chat?.chatId ?: update.callbackQuery?.message?.chat?.chatId ?: return
     val inputData = update.callbackQuery?.data
+    val username = update.message?.chat?.username ?: update.callbackQuery?.message?.chat?.username ?: return
 
     val trainer = trainers.getOrPut(chatId) {
-        LearnWordsTrainer("$chatId.txt")
+        LearnWordsTrainer("$username.txt")
     }
 
     when {
