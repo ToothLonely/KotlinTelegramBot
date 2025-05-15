@@ -1,6 +1,8 @@
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.serialization") version "2.1.20"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    application
 }
 
 group = "org.example"
@@ -19,5 +21,15 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(11)
+}
+
+application {
+    mainClass.set("org.example.TelegramKt")
+}
+
+tasks.shadowJar{
+    manifest {
+        attributes["Main-Class"] = "org.example.TelegramKt"
+    }
 }
