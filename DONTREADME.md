@@ -1,26 +1,33 @@
+## Добавление jar файла (на локальном устройстве, не на Virtual Private Server)
+
+1. Собрать shadowJar:
+   `./gradlew shadowJar` в консоли ИЛИ значок gradle на панели справа -> shadow -> shadowJar -> run в Intellij IDEA
+
+2. Запуск jar (для проверки):
+   java -jar build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar <>
+
+3. Копировать jar на VPS переименовывая его одновременно в CringeLearningBot.jar:
+   `scp build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar root@001.001.001.001:/root/CringeLearningBot.jar`
+
+4. Копировать words.txt на VPS:
+   `scp words.txt root@001.001.001.001:/root/words.txt`
+
+## Подключение и установка java (для нового VPS)
+
 1. Подключение к серверу:
-ssh root@001.001.001.001
+   `ssh root@001.001.001.001`
 
 2. Обновить установленные пакеты:
-apt update apt upgrade
+   `apt update`
+   `apt upgrade`
 
 3. Установка jdk:
-apt install default-jdk
+   `apt install default-jdk`
 
 4. Убедиться, что jdk установлен:
-java --version
+   `java --version`
 
-5. Соберем shadowJar командой:
-./gradlew shadowJar
+## Запуск бота в фоне
 
-6. Копировать jar на VPS переименовывая его одновременно в bot.jar:
-scp build/libs/CringeTelegramBot-1.0-SNAPSHOT.jar root@001.001.001.001:/root/bot.jar
-
-7. Копировать words.txt на VPS: 
-scp words.txt root@001.001.001.001:/root/words.txt
-
-8. Подключиться к серверу по SSH:
-ssh root@001.001.001.001
-
-9. Запустить бота в фоне командой:
-nohup java -jar bot.jar <ТОКЕН ТЕЛЕГРАМ> &
+1. Запустить бота в фоне командой:
+   `nohup java -jar CringeLearningBot.jar <ТОКЕН ТЕЛЕГРАМ> &`
