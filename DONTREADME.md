@@ -4,7 +4,7 @@
    `./gradlew shadowJar` в консоли ИЛИ значок gradle на панели справа -> shadow -> shadowJar -> run в Intellij IDEA
 
 2. Запуск jar (для проверки):
-   java -jar build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar <>
+   java -jar build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar <ТОКЕН ТЕЛЕГРАМ>
 
 3. Копировать jar на VPS переименовывая его одновременно в CringeLearningBot.jar:
    `scp build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar root@001.001.001.001:/root/CringeLearningBot.jar`
