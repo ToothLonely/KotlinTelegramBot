@@ -6,12 +6,6 @@
 2. Запуск jar (для проверки):
    java -jar build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar <ТОКЕН ТЕЛЕГРАМ>
 
-3. Копировать jar на VPS переименовывая его одновременно в CringeLearningBot.jar:
-   `scp build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar root@001.001.001.001:/root/CringeLearningBot.jar`
-
-4. Копировать words.txt на VPS:
-   `scp words.txt root@001.001.001.001:/root/words.txt`
-
 ## Подключение и установка java (для нового VPS)
 
 1. Подключение к серверу:
@@ -29,5 +23,19 @@
 
 ## Запуск бота в фоне
 
-1. Запустить бота в фоне командой:
+1. Копировать jar на VPS переименовывая его одновременно в CringeLearningBot.jar:
+   `scp build/libs/KotlinTelegramBot-1.0-SNAPSHOT-all.jar root@001.001.001.001:/root/CringeLearningBot.jar`
+
+2. Копировать words.txt на VPS:
+   `scp words.txt root@001.001.001.001:/root/words.txt`
+
+3. Запустить бота в фоне командой:
    `nohup java -jar CringeLearningBot.jar <ТОКЕН ТЕЛЕГРАМ> &`
+
+## Остановка бота
+
+1. Найти данный фоновый процесс (искомый PID это второе поле):
+   `ps aux | grep java`
+
+2. Убить этот процесс по его PID:
+   `kill -9 <PID>`
