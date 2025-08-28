@@ -50,4 +50,4 @@ jobs:
           username:  ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            systemctl restart cringe-learning-bot
+            sudo systemctl restart cringe-learning-bot
