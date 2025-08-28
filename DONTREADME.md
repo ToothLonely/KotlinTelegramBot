@@ -30,7 +30,7 @@
    `scp words.txt root@001.001.001.001:/root/words.txt`
 
 3. Запустить бота в фоне командой:
-   `nohup java -jar CringeLearningBot.jar <ТОКЕН ТЕЛЕГРАМ> &`
+   `nohup java -jar CringeLearningBot.jar <ТОКЕН ТЕЛЕГРАМ> &` 
 
 ## Остановка бота
 
