@@ -51,3 +51,4 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             sudo systemctl restart cringe-learning-bot
+            secrets.SSH_PASSWORD
