@@ -123,7 +123,7 @@ class DatabaseUserDictionary : IUserDictionary {
 
         val addUserQuery = """
             INSERT INTO users
-            VALUES('$userName', ${DateTimeFormatter.ISO_INSTANT.format(Instant.now())}, $chatId)
+            VALUES('$userName', '${DateTimeFormatter.ISO_INSTANT.format(Instant.now())}', $chatId)
         """.trimIndent()
 
         DriverManager.getConnection(connectionName).use { connection ->
