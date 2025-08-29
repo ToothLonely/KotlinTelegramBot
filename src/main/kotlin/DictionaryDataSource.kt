@@ -15,7 +15,6 @@ fun main() {
     }
 }
 
-
 const val CREATE_TABLE_WORDS = """
     CREATE TABLE IF NOT EXISTS 'words' (
     'id' integer PRIMARY KEY,
@@ -26,18 +25,18 @@ const val CREATE_TABLE_WORDS = """
 
 const val CREATE_TABLE_USER_ANSWERS = """
     CREATE TABLE IF NOT EXISTS 'user_answers' (
-    'user_id' integer,
+    'user_name' varchar,
     'word_id' integer,
-    'correct_answer_count' integer,
+    'correct_answers_count' integer DEFAULT 0,
     'updated_at' timestamp,
-    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(user_name) REFERENCES users(name),
     FOREIGN KEY(word_id) REFERENCES words(id)
     );
 """
 
 const val CREATE_TABLE_USERS = """
     CREATE TABLE IF NOT EXISTS 'users' (
-    'id' integer PRIMARY KEY,
+    'name' varchar PRIMARY KEY,
     'username' varchar,
     'created_at' timestamp,
     'chat_id' integer
