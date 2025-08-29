@@ -1,6 +1,8 @@
 package org.example
 
 import java.sql.DriverManager
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 class DatabaseUserDictionary : IUserDictionary {
 
@@ -34,7 +36,7 @@ class DatabaseUserDictionary : IUserDictionary {
         val getLearnedWordsQuery = """
             SELECT text, translate, correct_answers_count
             FROM user_answers AS ua 
-            JOIN words AS w ON w.word_id = ua.word_id 
+            JOIN words AS w ON w.id = ua.word_id 
             WHERE correct_answers_count >= 3 AND user_name = '$userName'
         """.trimIndent()
 
@@ -60,7 +62,7 @@ class DatabaseUserDictionary : IUserDictionary {
         val getLearnedWordsQuery = """
             SELECT text, translate, correct_answers_count
             FROM user_answers AS ua 
-            JOIN words AS w ON w.word_id = ua.word_id 
+            JOIN words AS w ON w.id = ua.word_id 
             WHERE user_name = '$userName' AND correct_answers_count < 3
         """.trimIndent()
 
@@ -87,9 +89,10 @@ class DatabaseUserDictionary : IUserDictionary {
             UPDATE user_answers
             SET correct_answers_count = $correctAnswersCount
             WHERE user_name = '$userName' AND word_id = (
-                SELECT word_id 
+                SELECT id 
                 FROM words
                 WHERE text = '$word'
+                LIMIT 1
             )
         """.trimIndent()
 
@@ -102,11 +105,30 @@ class DatabaseUserDictionary : IUserDictionary {
         val resetUserProgressQuery = """
             UPDATE user_answers
             SET correct_answers_count = 0
-            WHERE user_name = $userName
+            WHERE user_name = '$userName'
         """.trimIndent()
 
         DriverManager.getConnection(connectionName).use { connection ->
             connection.createStatement().executeUpdate(resetUserProgressQuery)
+        }
+    }
+
+    override fun addUser(userName: String, chatId: Long) {
+
+        val checkNewUserQuery = """
+            SELECT COUNT(name) AS count_of_names
+            FROM users
+            WHERE name = '$userName'
+        """.trimIndent()
+
+        val addUserQuery = """
+            INSERT INTO users
+            VALUES('$userName', ${DateTimeFormatter.ISO_INSTANT.format(Instant.now())}, $chatId)
+        """.trimIndent()
+
+        DriverManager.getConnection(connectionName).use { connection ->
+            val countOfUsers = connection.createStatement().executeQuery(checkNewUserQuery).getInt("count_of_names")
+            if (countOfUsers == 0) connection.createStatement().executeUpdate(addUserQuery)
         }
     }
 

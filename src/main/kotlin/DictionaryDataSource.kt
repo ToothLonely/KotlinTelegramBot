@@ -37,7 +37,6 @@ const val CREATE_TABLE_USER_ANSWERS = """
 const val CREATE_TABLE_USERS = """
     CREATE TABLE IF NOT EXISTS 'users' (
     'name' varchar PRIMARY KEY,
-    'username' varchar,
     'created_at' timestamp,
     'chat_id' integer
     );

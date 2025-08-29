@@ -7,4 +7,5 @@ interface IUserDictionary {
     fun getUnlearnedWords(userName: String): List<Word>
     fun setCorrectAnswersCount(word: String, correctAnswersCount: Int, userName: String)
     fun resetUserProgress(userName: String)
+    fun addUser(userName: String, chatId: Long)
 }
