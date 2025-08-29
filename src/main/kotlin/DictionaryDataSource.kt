@@ -10,9 +10,11 @@ fun main() {
         statement.executeUpdate(CREATE_TABLE_WORDS.trimIndent())
         statement.executeUpdate(CREATE_TABLE_USER_ANSWERS.trimIndent())
         statement.executeUpdate(CREATE_TABLE_USERS.trimIndent())
+        statement.executeUpdate("PRAGMA foreign_keys = ON;")
         updateDictionary(File("words.txt"), statement)
     }
 }
+
 
 const val CREATE_TABLE_WORDS = """
     CREATE TABLE IF NOT EXISTS 'words' (
@@ -27,7 +29,9 @@ const val CREATE_TABLE_USER_ANSWERS = """
     'user_id' integer,
     'word_id' integer,
     'correct_answer_count' integer,
-    'updated_at' timestamp
+    'updated_at' timestamp,
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(word_id) REFERENCES words(id)
     );
 """
 
