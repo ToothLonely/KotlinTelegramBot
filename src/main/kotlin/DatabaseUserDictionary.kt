@@ -17,8 +17,8 @@ class DatabaseUserDictionary : IUserDictionary {
         """.trimIndent()
 
         return DriverManager.getConnection(connectionName).use { connection ->
-            connection.createStatement().executeQuery(getNumOfLearnedWordsQuery)
-        }.getInt("count")
+            connection.createStatement().executeQuery(getNumOfLearnedWordsQuery).getInt("count")
+        }
     }
 
     override fun getSize(): Int {
@@ -28,8 +28,8 @@ class DatabaseUserDictionary : IUserDictionary {
         """.trimIndent()
 
         return DriverManager.getConnection(connectionName).use { connection ->
-            connection.createStatement().executeQuery(getSizeQuery)
-        }.getInt("max_id")
+            connection.createStatement().executeQuery(getSizeQuery).getInt("max_id")
+        }
     }
 
     override fun getLearnedWords(userName: String): List<Word> {
@@ -63,7 +63,7 @@ class DatabaseUserDictionary : IUserDictionary {
             SELECT text, translate, correct_answers_count
             FROM user_answers AS ua 
             JOIN words AS w ON w.id = ua.word_id 
-            WHERE user_name = '$userName' AND correct_answers_count < 3
+            WHERE user_name LIKE '$userName' AND correct_answers_count < 3
         """.trimIndent()
 
         val unlearnedList = mutableListOf<Word>()
@@ -121,14 +121,24 @@ class DatabaseUserDictionary : IUserDictionary {
             WHERE name = '$userName'
         """.trimIndent()
 
-        val addUserQuery = """
-            INSERT INTO users
-            VALUES('$userName', '${DateTimeFormatter.ISO_INSTANT.format(Instant.now())}', $chatId)
+        val addUserInUsersQuery = """
+            INSERT INTO users(name, chat_id)
+            VALUES('$userName', $chatId)
+        """.trimIndent()
+
+        val addUserInUserAnswersQuery = """
+            INSERT INTO user_answers(user_name, word_id)
+            SELECT '$userName', id
+            FROM words
         """.trimIndent()
 
         DriverManager.getConnection(connectionName).use { connection ->
-            val countOfUsers = connection.createStatement().executeQuery(checkNewUserQuery).getInt("count_of_names")
-            if (countOfUsers == 0) connection.createStatement().executeUpdate(addUserQuery)
+            val statement = connection.createStatement()
+            val countOfUsers = statement.executeQuery(checkNewUserQuery).getInt("count_of_names")
+            if (countOfUsers == 0) {
+                statement.executeUpdate(addUserInUsersQuery)
+                statement.executeUpdate(addUserInUserAnswersQuery)
+            }
         }
     }
 

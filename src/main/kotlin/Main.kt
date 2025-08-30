@@ -1,6 +1,5 @@
 package org.example
 
-const val ONE_HUNDRED_PERCENT = 100
 const val DIFFERENCE_BETWEEN_LIST_INDEX_AND_ANSWER_INDEX = 1
 const val LEARN_WORDS = "Учить слова"
 const val STATISTIC = "Статистика"

@@ -1,6 +1,6 @@
 package org.example
 
-import java.io.File
+const val ONE_HUNDRED_PERCENT = 100
 
 data class Statistics(
     val learnedCount: Int,
@@ -58,7 +58,7 @@ class LearnWordsTrainer(private val userName: String = "words.txt") {
         val correctWord = question.correctAnswer.englishWord
         when (userAnswerInput) {
             correctAnswerId -> {
-                dictionary.setCorrectAnswersCount(correctWord, question.correctAnswer.correctAnswerCount++, userName)
+                dictionary.setCorrectAnswersCount(correctWord, ++question.correctAnswer.correctAnswerCount, userName)
                 return true
             }
 
