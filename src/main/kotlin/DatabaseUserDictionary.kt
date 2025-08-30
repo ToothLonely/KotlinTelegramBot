@@ -66,7 +66,7 @@ class DatabaseUserDictionary : IUserDictionary {
             WHERE user_name = '$userName' AND correct_answers_count < 3
         """.trimIndent()
 
-        val learnedList = mutableListOf<Word>()
+        val unlearnedList = mutableListOf<Word>()
 
         DriverManager.getConnection(connectionName).use { connection ->
             val answer = connection.createStatement().executeQuery(getLearnedWordsQuery)
@@ -77,11 +77,11 @@ class DatabaseUserDictionary : IUserDictionary {
                         answer.getString("translate"),
                         answer.getInt("correct_answers_count")
                     )
-                learnedList.add(word)
+                unlearnedList.add(word)
             }
         }
 
-        return learnedList
+        return unlearnedList
     }
 
     override fun setCorrectAnswersCount(word: String, correctAnswersCount: Int, userName: String) {

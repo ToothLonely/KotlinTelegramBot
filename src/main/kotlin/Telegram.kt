@@ -33,6 +33,7 @@ fun handleUpdate(update: Update, trainers: HashMap<Long, LearnWordsTrainer>, tel
     val username = update.message?.chat?.username ?: update.callbackQuery?.message?.chat?.username ?: return
 
     val trainer = trainers.getOrPut(chatId) {
+        DatabaseUserDictionary().addUser(username, chatId)
         LearnWordsTrainer(username)
     }
 
