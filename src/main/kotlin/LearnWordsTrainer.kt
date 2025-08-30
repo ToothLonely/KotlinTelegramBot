@@ -19,51 +19,21 @@ data class Word(
     var correctAnswerCount: Int = 0
 )
 
-class LearnWordsTrainer(val filename: String = "words.txt") {
+class LearnWordsTrainer(private val userName: String = "words.txt") {
 
-    private val dictionary = loadDictionary()
-    private val minimumCorrectAnswers = 3
+    private val dictionary = DatabaseUserDictionary()
     private val numberOfWordsToAnswer = 4
     lateinit var question: Questions
 
-    private fun loadDictionary(): List<Word> {
-        try {
-
-            val wordsFile = File(filename)
-            if(!wordsFile.exists()){
-                File("words.txt").copyTo(wordsFile)
-            }
-            val dictionary = mutableListOf<Word>()
-
-            wordsFile.readLines().forEach {
-                val line = it.split('|')
-                val word = Word(line[0], line[1], line.getOrNull(2)?.toIntOrNull() ?: 0)
-
-                dictionary.add(word)
-            }
-            return dictionary
-        } catch (e: IndexOutOfBoundsException) {
-            throw IllegalStateException("Не удалось загрузить словарь")
-        }
-    }
-
-    private fun saveDictionary() {
-        val wordsFile = File(filename)
-        wordsFile.writeText("")
-        dictionary.forEach { word ->
-            wordsFile.appendText("${word.englishWord}|${word.russianWord}|${word.correctAnswerCount}\n")
-        }
-    }
-
     fun getStatistic(): Statistics {
-        val learnedCount = dictionary.filter { it.correctAnswerCount >= minimumCorrectAnswers }.size
-        val totalCount = dictionary.size
+        val learnedCount = dictionary.getNumOfLearnedWords(userName)
+        val totalCount = dictionary.getSize()
         val percent = (learnedCount.toDouble() / totalCount) * ONE_HUNDRED_PERCENT
         return Statistics(learnedCount, totalCount, percent)
     }
 
     fun getNextQuestion(): Questions? {
-        val notLearnedList = dictionary.filter { it.correctAnswerCount < minimumCorrectAnswers }
+        val notLearnedList = dictionary.getUnlearnedWords(userName)
         if (notLearnedList.isEmpty()) return null
 
         var questionWords = notLearnedList.shuffled().take(numberOfWordsToAnswer)
@@ -72,7 +42,7 @@ class LearnWordsTrainer(val filename: String = "words.txt") {
         if (questionWords.size <= numberOfWordsToAnswer) {
             val numberOfWordsToAdd = numberOfWordsToAnswer - questionWords.size
             val learnedWords = dictionary
-                .filter { it.correctAnswerCount >= minimumCorrectAnswers }
+                .getLearnedWords(userName)
                 .shuffled()
                 .take(numberOfWordsToAdd)
             questionWords = questionWords.plus(learnedWords)
@@ -85,10 +55,10 @@ class LearnWordsTrainer(val filename: String = "words.txt") {
     fun checkAnswer(userAnswerInput: Int): Boolean {
         val correctAnswerId =
             question.variants.indexOf(question.correctAnswer)
+        val correctWord = question.correctAnswer.englishWord
         when (userAnswerInput) {
             correctAnswerId -> {
-                question.correctAnswer.correctAnswerCount++
-                saveDictionary()
+                dictionary.setCorrectAnswersCount(correctWord, question.correctAnswer.correctAnswerCount++, userName)
                 return true
             }
 
@@ -96,8 +66,7 @@ class LearnWordsTrainer(val filename: String = "words.txt") {
         }
     }
 
-    fun resetProgress(){
-        dictionary.forEach { it.correctAnswerCount = 0 }
-        saveDictionary()
+    fun resetProgress() {
+        dictionary.resetUserProgress(userName)
     }
 }
