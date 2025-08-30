@@ -16,29 +16,29 @@ fun main() {
 }
 
 const val CREATE_TABLE_WORDS = """
-    CREATE TABLE IF NOT EXISTS 'words' (
-    'id' integer PRIMARY KEY,
-    'text' varchar,
-    'translate' varchar
+    CREATE TABLE IF NOT EXISTS words (
+    id integer PRIMARY KEY,
+    text varchar,
+    translate varchar
     ); 
 """
 
 const val CREATE_TABLE_USER_ANSWERS = """
-    CREATE TABLE IF NOT EXISTS 'user_answers' (
-    'user_name' varchar,
-    'word_id' integer,
-    'correct_answers_count' integer DEFAULT 0,
-    'updated_at' timestamp,
-    FOREIGN KEY(user_name) REFERENCES users(name),
-    FOREIGN KEY(word_id) REFERENCES words(id)
+    CREATE TABLE IF NOT EXISTS user_answers (
+    user_name varchar,
+    word_id integer,
+    correct_answers_count integer DEFAULT 0,
+    updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_name) REFERENCES users(name) ON UPDATE CASCADE,
+    FOREIGN KEY(word_id) REFERENCES words(id) ON UPDATE CASCADE
     );
 """
 
 const val CREATE_TABLE_USERS = """
-    CREATE TABLE IF NOT EXISTS 'users' (
-    'name' varchar PRIMARY KEY,
-    'created_at' timestamp,
-    'chat_id' integer
+    CREATE TABLE IF NOT EXISTS users (
+    name varchar PRIMARY KEY,
+    created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+    chat_id integer
     );
 """
 
