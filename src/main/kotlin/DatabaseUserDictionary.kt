@@ -1,23 +1,31 @@
 package org.example
 
-import java.sql.DriverManager
-import java.time.Instant
-import java.time.format.DateTimeFormatter
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import java.sql.PreparedStatement
 
 class DatabaseUserDictionary : IUserDictionary {
 
     private val connectionName = "jdbc:sqlite:data.db"
+
+    private val config = HikariConfig().apply {
+        jdbcUrl = connectionName
+    }
+
+    private val dataSource = HikariDataSource(config)
 
     override fun getNumOfLearnedWords(userName: String): Int {
 
         val getNumOfLearnedWordsQuery = """
             SELECT COUNT(word_id) AS count
             FROM user_answers
-            WHERE correct_answers_count >= 3 AND user_name = '$userName'
+            WHERE correct_answers_count >= 3 AND user_name = ?
         """.trimIndent()
 
-        return DriverManager.getConnection(connectionName).use { connection ->
-            connection.createStatement().executeQuery(getNumOfLearnedWordsQuery).getInt("count")
+        return dataSource.connection.use { connection ->
+            val statement = connection.prepareStatement(getNumOfLearnedWordsQuery)
+            statement.setString(1, userName)
+            statement.executeQuery().getInt("count")
         }
     }
 
@@ -27,7 +35,7 @@ class DatabaseUserDictionary : IUserDictionary {
             FROM words
         """.trimIndent()
 
-        return DriverManager.getConnection(connectionName).use { connection ->
+        return dataSource.connection.use { connection ->
             connection.createStatement().executeQuery(getSizeQuery).getInt("max_id")
         }
     }
@@ -37,19 +45,21 @@ class DatabaseUserDictionary : IUserDictionary {
             SELECT text, translate, correct_answers_count
             FROM user_answers AS ua 
             JOIN words AS w ON w.id = ua.word_id 
-            WHERE correct_answers_count >= 3 AND user_name = '$userName'
+            WHERE correct_answers_count >= 3 AND user_name = ?
         """.trimIndent()
 
         val learnedList = mutableListOf<Word>()
 
-        DriverManager.getConnection(connectionName).use { connection ->
-            val answer = connection.createStatement().executeQuery(getLearnedWordsQuery)
-            while (answer.next()) {
+        dataSource.connection.use { connection ->
+            val statement = connection.prepareStatement(getLearnedWordsQuery)
+            statement.setString(1, userName)
+            val resultSet = statement.executeQuery()
+            while (resultSet.next()) {
                 val word =
                     Word(
-                        answer.getString("text"),
-                        answer.getString("translate"),
-                        answer.getInt("correct_answers_count")
+                        resultSet.getString("text"),
+                        resultSet.getString("translate"),
+                        resultSet.getInt("correct_answers_count")
                     )
                 learnedList.add(word)
             }
@@ -63,19 +73,21 @@ class DatabaseUserDictionary : IUserDictionary {
             SELECT text, translate, correct_answers_count
             FROM user_answers AS ua 
             JOIN words AS w ON w.id = ua.word_id 
-            WHERE user_name LIKE '$userName' AND correct_answers_count < 3
+            WHERE user_name = ? AND correct_answers_count < 3
         """.trimIndent()
 
         val unlearnedList = mutableListOf<Word>()
 
-        DriverManager.getConnection(connectionName).use { connection ->
-            val answer = connection.createStatement().executeQuery(getLearnedWordsQuery)
-            while (answer.next()) {
+        dataSource.connection.use { connection ->
+            val statement = connection.prepareStatement(getLearnedWordsQuery)
+            statement.setString(1, userName)
+            val resultSet = statement.executeQuery()
+            while (resultSet.next()) {
                 val word =
                     Word(
-                        answer.getString("text"),
-                        answer.getString("translate"),
-                        answer.getInt("correct_answers_count")
+                        resultSet.getString("text"),
+                        resultSet.getString("translate"),
+                        resultSet.getInt("correct_answers_count")
                     )
                 unlearnedList.add(word)
             }
@@ -87,17 +99,23 @@ class DatabaseUserDictionary : IUserDictionary {
     override fun setCorrectAnswersCount(word: String, correctAnswersCount: Int, userName: String) {
         val setCorrectAnswersCountQuery = """
             UPDATE user_answers
-            SET correct_answers_count = $correctAnswersCount
-            WHERE user_name = '$userName' AND word_id = (
+            SET correct_answers_count = ?
+            WHERE user_name = ? AND word_id = (
                 SELECT id 
                 FROM words
-                WHERE text = '$word'
+                WHERE text = ?
                 LIMIT 1
             )
         """.trimIndent()
 
-        DriverManager.getConnection(connectionName).use { connection ->
-            connection.createStatement().executeUpdate(setCorrectAnswersCountQuery)
+        dataSource.connection.use { connection ->
+            val statement: PreparedStatement = connection.prepareStatement(setCorrectAnswersCountQuery)
+            with(statement) {
+                setInt(1, correctAnswersCount)
+                setString(2, userName)
+                setString(3, word)
+            }
+            statement.executeUpdate()
         }
     }
 
@@ -105,11 +123,13 @@ class DatabaseUserDictionary : IUserDictionary {
         val resetUserProgressQuery = """
             UPDATE user_answers
             SET correct_answers_count = 0
-            WHERE user_name = '$userName'
+            WHERE user_name = ?
         """.trimIndent()
 
-        DriverManager.getConnection(connectionName).use { connection ->
-            connection.createStatement().executeUpdate(resetUserProgressQuery)
+        dataSource.connection.use { connection ->
+            val statement = connection.prepareStatement(resetUserProgressQuery)
+            statement.setString(1, userName)
+            statement.executeUpdate()
         }
     }
 
@@ -118,28 +138,40 @@ class DatabaseUserDictionary : IUserDictionary {
         val checkNewUserQuery = """
             SELECT COUNT(name) AS count_of_names
             FROM users
-            WHERE name = '$userName'
+            WHERE name = ?
         """.trimIndent()
 
         val addUserInUsersQuery = """
             INSERT INTO users(name, chat_id)
-            VALUES('$userName', $chatId)
+            VALUES(?, ?)
         """.trimIndent()
 
         val addUserInUserAnswersQuery = """
             INSERT INTO user_answers(user_name, word_id)
-            SELECT '$userName', id
+            SELECT ?, id
             FROM words
         """.trimIndent()
 
-        DriverManager.getConnection(connectionName).use { connection ->
-            val statement = connection.createStatement()
-            val countOfUsers = statement.executeQuery(checkNewUserQuery).getInt("count_of_names")
+        dataSource.connection.use { connection ->
+            val checkingStatement = connection.prepareStatement(checkNewUserQuery)
+            checkingStatement.setString(1, userName)
+            val countOfUsers = checkingStatement.executeQuery().getInt("count_of_names")
+
             if (countOfUsers == 0) {
-                statement.executeUpdate(addUserInUsersQuery)
-                statement.executeUpdate(addUserInUserAnswersQuery)
+                val addInUsersStatement = connection.prepareStatement(addUserInUsersQuery)
+                val addInUserAnswersStatement = connection.prepareStatement(addUserInUserAnswersQuery)
+
+                with(addInUsersStatement){
+                    setString(1, userName)
+                    setLong(2, chatId)
+                    executeUpdate()
+                }
+
+                with(addInUserAnswersStatement){
+                    setString(1, userName)
+                    executeUpdate()
+                }
             }
         }
     }
-
 }
